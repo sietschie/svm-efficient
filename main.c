@@ -3,8 +3,10 @@
 #include <errno.h>
 #include <string.h>
 #include <math.h>
+
 #define Malloc(type,n) (type *)malloc((n)*sizeof(type))
 
+#define INFINITY	__builtin_inf() // todo: get rid of that
 
 struct svm_node
 {
@@ -357,13 +359,13 @@ int main (int argc, const char ** argv)
     const char* filename;
     
     if(argc < 2)
-		filename = "heart_scale";
+		filename = "data/heart_scale";
     else
     	filename = argv[1];
 
     read_problem(filename);
  
- 	double *K = malloc(prob.l * prob.l * sizeof(double));
+ 	double *K = (double*) malloc(prob.l * prob.l * sizeof(double));
 	//double *alpha = malloc(prob.l * sizeof(double));
    
     generate_K(K);
@@ -372,8 +374,8 @@ int main (int argc, const char ** argv)
 	
 	printf("start_index = %d \n", start_index);
 
-	double* alpha = malloc(prob.l * sizeof(double));
-	double *new_alpha = malloc(prob.l * sizeof(double));
+	double* alpha = (double*) malloc(prob.l * sizeof(double));
+	double *new_alpha = (double*) malloc(prob.l * sizeof(double));
 
 	generate_einheitsvektor(start_index, alpha);
 //    double test = f()
