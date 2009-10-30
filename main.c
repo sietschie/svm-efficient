@@ -7,6 +7,7 @@
 #define Malloc(type,n) (type *)malloc((n)*sizeof(type))
 
 #define INFINITY	__builtin_inf() // todo: get rid of that
+//#defince INFINITY	HUGE_VAL //aus libsvm
 
 struct svm_node
 {
@@ -53,7 +54,7 @@ static char* readline(FILE *input)
 		line = (char *) realloc(line,max_line_len);
 		len = (int) strlen(line);
 		if(fgets(line+len,max_line_len-len,input) == NULL)
-			break;
+			brea	;
 	}
 	return line;
 }

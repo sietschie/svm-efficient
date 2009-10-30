@@ -23,8 +23,8 @@ struct svm_problem
 
 struct svm_problem prob;		// set by read_problem
 
-struct svm_problem prob_a;
-struct svm_problem prob_b;
+struct svm_problem prob_p;
+struct svm_problem prob_q;
 
 static char *line = NULL;
 static int max_line_len;
@@ -158,203 +158,113 @@ void read_problem(const char *filename)
 	fclose(fp);
 }
 
-double k(struct svm_node* px, struct svm_node* py)
+int compute_max_index(const struct svm_problem prob)
+{
+	int i;
+	int max_index = 1;
+	for(i=0;i<prob.l;i++)
+	{
+		struct svm_node* px = prob.x[i]; 
+		while(px->index != -1)
+		{
+			if(px->index > max_index)
+				max_index = px->index;
+			px++;
+		}
+	}
+	return max_index;
+}
+
+void init_nodes(struct svm_node* vector, int elements)
+{
+	int i;
+	for(i=0;i< elements-1 ; i++)
+		vector[i].index = i+1;
+	vector[elements-1].index = -1;
+}
+
+void compute_vector_from_weights(double* weights, struct svm_node* vector, const struct svm_problem prob)
+{
+	int i;
+	for(i=0;i<prob.l;i++)
+	{
+		struct svm_node* out= vector;
+		struct svm_node* in = prob.x[0];
+		while(in->index != -1 && out->index != -1)
+		{
+			if(in->index == out->index)
+			{
+				if(i==0)
+					out->value = 0; //todo: schoener machen
+				//printf("gleiche Indizes: %d  %d  , value = %f, weight = %f, result = %f outvalue = %f\n", in->index, out->index, in->value, weights[i], in->value*weights[0], out->value);
+				out->value += in->value * weights[i];
+				//printf("geschriebener Wert = %f \n", out->value);
+				
+				++in;
+				++out;
+			}
+			else
+			{
+				//printf("missing element: %d  %d  \n", in->index, out->index);
+				if(in->index > out->index)
+					++out;
+				else
+					++in;
+			}			
+		}
+	}	
+}
+
+double compute_dot_product_with_differences(const struct svm_node* vector, const struct svm_node* x, const struct svm_node* y) // <p - y_i, x_i - y_i>
 {
 	double sum = 0;
-	while(px->index != -1 && py->index != -1)
+	while(x->index != -1 && vector->index != -1)
 	{
-		if(px->index == py->index)
+		if(x->index == vector->index)
 		{
-			sum += px->value * py->value;
-			++px;
-			++py;
+			//printf("sum = %f  vector = %f  x = %f  y = %f \n", sum, vector->value, x->value, y->value);
+			sum += (vector->value - y->value)*(x->value - y->value);
+			++x;
+			++y;
+			++vector;
 		}
 		else
 		{
-			if(px->index > py->index)
-				++py;
-			else
-				++px;
+			//printf("missing element 2.. \n");
+			if(x->index > vector->index)
+				++vector;
+			else {
+				++x; ++y; }
 		}			
 	}
 	return sum;
 }
 
-void generate_K(double *K)
+int find_max_dotproduct(const struct svm_node* x, const struct svm_node* y, struct svm_problem prob)
 {
-	
-	int i, j;
-	for(i = 0; i < prob.l; i++)
-	for(j = 0; j < prob.l; j++)
-	{
-		K[i + prob.l * j] = prob.y[i] * prob.y[j] * k(prob.x[i], prob.x[j]) + prob.y[i] * prob.y[j];
-		if(i == j)
-			K[i + prob.l * j] += 1/C;
-		//printf(" K[%d + %d * %d] = %f \n", i, prob.l, j, K[i + prob.l * j]);
-	}
-}
-
-double f(double* K, double *alpha)
-{
-	double sum = 0;
-		
-	int i, j;
-	for(i = 0; i < prob.l; i++)
-	for(j = 0; j < prob.l; j++)
-	{
-		sum += - alpha[i] * alpha[j] * K[i + prob.l * j];
-		//printf("sum = %f, alpha[i] = %f, alpha[j] = %f, K[i + prob.l * j] = %f, i=%d, j=%d \n", sum, alpha[i], alpha[j], K[i + prob.l * j], i, j);
-	}
-	return sum;
-}
-
-double zeile_aus_matrix_mal_vektor(double *K, double *alpha, int index)
-{
-	double sum = 0;
 	int i;
+	double max = -HUGE_VAL; //compute_dot_product_with_differences(prob.x[0], x, y);
+	int max_index = -1;
 	for(i=0;i<prob.l;i++)
+//	i=1;
 	{
-		sum += K[i + prob.l * index] * alpha[i];
-	}
-}
-
-int argmax_nabla_f(double* K, double* alpha)
-{
-	int i = 0;
-	double max = -2 * zeile_aus_matrix_mal_vektor(K, alpha, 0);
-	int max_index = 0;
-	
-	for(i=1; i < prob.l; i++)
-	{
-		double current = -2 * zeile_aus_matrix_mal_vektor(K, alpha, i);
-		if(current > max)
-		{
-			max = current;
+		double dotproduct = compute_dot_product_with_differences(prob.x[i], x, y);
+		printf("index = %d dotproduct = %f  max = %f \n", i, dotproduct, max);
+		if(dotproduct > max) {
+			max = dotproduct;
 			max_index = i;
 		}
 	}
-	//printf(" max = %f  max_index = %d \n", max, max_index);
 	return max_index;
 }
 
-int argmax_f_ei(double *K)
+void print_vector( const struct svm_node* vector)
 {
-	int i;
-	int min_index = 0;
-	double min_value = K[0];
-	for (i=1; i<prob.l; i++) {
-		if(K[i + prob.l * i] < min_value)
-		{
-			min_index = i;
-			min_value = K[i + prob.l * i];
-		}
-	}
-	
-	return min_index;
-}
-
-void generate_einheitsvektor(int index, double *alpha)
-{
-	int i;
-	for(i=0;i<prob.l;i++)
-		if(i == index)
-			alpha[i]=1.0;
-		else
-			alpha[i]=0.0;
-}
-
-void compute_new_alpha(double* alpha, double t, int is, double *new_alpha)
-{
-	//printf("new_alpha = ");
-	int i;
-	for(i=0;i<prob.l;i++)
+	while(vector->index != -1)
 	{
-		if(i==is)
-			new_alpha[i] = alpha[i] + t * (1 - alpha[i]);
-		else
-			new_alpha[i] = alpha[i] - t * ( alpha[i] );
-		//printf(" %f ", new_alpha[i]);
+		printf("%d: %f \n", vector->index, vector->value);
+		++vector;
 	}
-	//printf("\n");
-}
-
-
-
-double find_t(double *K, double *alpha, int is, double * new_alpha)
-{
-
-	
-	
-	double t = 0.0;
-
-	compute_new_alpha(alpha, t, is, new_alpha);	
-	double max_value = f(K, new_alpha);
-	double max_t = 0.0;
-
-	for (; t<=1.0; t+=0.0001) {
-		compute_new_alpha(alpha, t, is, new_alpha);	
-		double new_value = f(K, new_alpha);
-		//printf("t = %f, value = %f \n", t, new_value);
-		if (new_value > max_value) {
-			max_value = new_value;
-			max_t = t;
-		}
-	}
-		
-	printf(" empirical max_t = %f \n", max_t);
-	
-	return max_t;
-}
-
-double e(int i, int j)
-{	
-	if(i==j)
-		return 1.0;
-	else 
-		return 0.0;
-}
-
-double find_t2(double *K, double *alpha, int is)
-{
-	int i,j;
-	
-	double zaehler = 0.0;
-	double nenner = 0.0;
-	
-	for (i=0; i<prob.l; i++)
-	for (j=0; j<prob.l; j++) {
-
-		zaehler += ( -alpha[i]*e(is, j) + alpha[i]*alpha[j] - alpha[j]*e(is,i) + alpha[i]*alpha[j]) * K[i + prob.l * j];
-		nenner += 2 * ( e(is,i)* e(is,j) - alpha[j] * e(is,i) - alpha[i] * e(is,j) + alpha[i] * alpha[j]) * K[i + prob.l * j];
-	}
-	
-	double t = zaehler / nenner;
-
-	//printf("berechnetes t = %f \n" , t );
-	
-	return t;
-}
-
-double compute_absolute_duality_gap(double *K, double *alpha)
-{
-	int i = argmax_nabla_f(K, alpha);
-	double res =  -2*zeile_aus_matrix_mal_vektor(K, alpha, i) - 2 * f(K, alpha);
-	return res;
-}
-
-double compute_relative_duality_gap(double *K, double *alpha)
-{
-	double absolute_gap = compute_absolute_duality_gap( K, alpha);
-
-	double nenner = absolute_gap + f(K,alpha); 
-	double res;
-
-	if(nenner >= 0.0)
-		res = INFINITY; 
-	else
-		res = - absolute_gap / (absolute_gap + f(K,alpha));
-	
-	return res;
 }
 
 int main (int argc, const char ** argv)
@@ -368,7 +278,7 @@ int main (int argc, const char ** argv)
 
     read_problem(filename);
     
-    prob_a = prob;
+    prob_p = prob;
 
     if(argc < 3)
 		filename = "data/heart_scale.minus";
@@ -377,60 +287,56 @@ int main (int argc, const char ** argv)
 
     read_problem(filename);
 
-    prob_b = prob;
+    prob_q = prob;
     
-    printf("prob_a.l = %d   prob_b.l = %d \n", prob_a.l, prob_b.l);
+    printf("prob_p.l = %d   prob_q.l = %d \n", prob_p.l, prob_q.l);
+    
+    int max_index_q = compute_max_index(prob_q);
+    int max_index_p = compute_max_index(prob_p);
+    
+    printf("max_index P = %d \n", max_index_p);
+    printf("max_index Q = %d \n", max_index_q);
 
-/* 	double *K = (double*) malloc(prob.l * prob.l * sizeof(double));
-	//double *alpha = malloc(prob.l * sizeof(double));
-   
-    generate_K(K);
-	
-	int start_index = argmax_f_ei(K);
-	
-	printf("start_index = %d \n", start_index);
-
-	double* alpha = (double*) malloc(prob.l * sizeof(double));
-	double *new_alpha = (double*) malloc(prob.l * sizeof(double));
-
-	generate_einheitsvektor(start_index, alpha);
-//    double test = f()
-	
-	double min_error= 5;
-	double rdg = INFINITY; //todo:besseren initialen wert finden
-	int counter = 0;
-	
-	//while (rdg < min_error) {
-	while (rdg > min_error) { // todo: ist kleiner als ein schreibfehler?
-	
-		int is = argmax_nabla_f(K, alpha);
-	
-		//printf(" is = %d\n", is);
-
-		double t = find_t2(K, alpha, is);
-		
-		compute_new_alpha(alpha, t, is, new_alpha);	
-		
-		//t = find_t(K, alpha, is, new_alpha);
-	
-		double *temp = alpha;
-		alpha = new_alpha;
-		new_alpha = temp;
-	
-		double adg = compute_absolute_duality_gap(K, alpha);
-		rdg = compute_relative_duality_gap(K,alpha);
-	
-		counter++;
-		
-		//printf("adg = %f, rdg = %f f(alpha) = %f is = %d count = %d\n", adg, rdg, f(K, alpha), is, counter);
-	
-	}
+	int elements = max_index_p;
+	if(elements < max_index_q)	elements = max_index_q;
+    elements++; //add one for the stopping index -1
+    
+    double* x_weights = (double *) malloc(prob_p.l * sizeof(double));
+    struct svm_node* x = (struct svm_node *) malloc(elements * sizeof(struct svm_node));
+	init_nodes(x, elements);
+    
+    double* y_weights = (double *) malloc(prob_q.l * sizeof(double));
+    struct svm_node* y = (struct svm_node *) malloc(elements * sizeof(struct svm_node));
+	init_nodes(y, elements);
 
 	int i;
-	for(i = 0; i < prob.l; i++)
-	{
-		//printf(" alpha[%3d} = %f \n",i, alpha[i]);
-	}*/
+	x_weights[0] = 1.0;
+	for(i=1;i<prob_p.l;i++)
+		x_weights[i]=0.0;
+
+	y_weights[0] = 1.0;
+	for(i=1;i<prob_q.l;i++)
+		y_weights[i]=0.0;
+		
+	
+
+	compute_vector_from_weights(x_weights, x, prob_p);
+
+//	print_vector(x);
+//	print_vector(prob_p.x[0]);
+	
+
+	compute_vector_from_weights(y_weights, y, prob_q);
+
+
+	// Step 1
+	printf("erster Aufruf... \n");
+	int max_p = find_max_dotproduct( x, y, prob_p);
+
+	printf("zweiter Aufruf... \n");
+	int max_q = find_max_dotproduct( y, x, prob_q);
+
+	printf("max_p = %d   max_q = %d \n", max_p, max_q);
 
     return 0;
 }
