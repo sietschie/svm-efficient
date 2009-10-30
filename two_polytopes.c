@@ -240,10 +240,12 @@ double compute_dot_product_with_differences(const struct svm_node* vector, const
 	return sum;
 }
 
-int find_max_dotproduct(const struct svm_node* x, const struct svm_node* y, struct svm_problem prob)
+
+
+int find_max_dotproduct(const struct svm_node* x, const struct svm_node* y, struct svm_problem prob, double &max)
 {
 	int i;
-	double max = -HUGE_VAL; //compute_dot_product_with_differences(prob.x[0], x, y);
+	max = -HUGE_VAL; //compute_dot_product_with_differences(prob.x[0], x, y);
 	int max_index = -1;
 	for(i=0;i<prob.l;i++)
 //	i=1;
@@ -264,6 +266,68 @@ void print_vector( const struct svm_node* vector)
 	{
 		printf("%d: %f \n", vector->index, vector->value);
 		++vector;
+	}
+}
+
+double compute_dot_product_with_differences(const struct svm_node* a, const struct svm_node* b, const struct svm_node* c, const struct svm_node* d) // <a - b, c - d>
+{
+	double sum = 0;
+	while(a->index != -1 && b->index != -1 && c->index != -1 && d->index != -1)
+	{
+		if(a->index == b->index == c->index == d->index == )
+		{
+			//printf("sum = %f  vector = %f  x = %f  y = %f \n", sum, vector->value, x->value, y->value);
+			sum += (a->value - b->value)*(c->value - d->value);
+			++a;
+			++b;
+			++c;
+			++d;
+		}
+		else
+		{
+			//printf("missing element 2.. \n"); // todo: was tun bei fehlenden werten?
+
+			struct svm_node* min = a;
+			if(min->index > b->index)	min=b;
+			if(min->index > c->index)	min=c;
+			if(min->index > d->index)	min=d;
+		
+			++min;
+
+			//if(x->index > vector->index)
+			//	++vector;
+			//else {
+			//	++x; ++y; }
+		}			
+	}
+	return sum;
+}
+
+void add_proportional(const struct svm_node* a, const struct svm_node* b, double lambda)
+{
+	while(a->index != -1 && b->index != -1) {
+		if(a->index == b->index)
+			a->value = lambda*a->value + (1.0 - lambda)* b->value;
+			++a;
+			++b;
+		} else {
+			if(a->index > b->index)
+				++b;
+			else {
+				++a; ++b; }
+		}
+	}
+}
+
+void add_to_weights(double* weights, double lambda, int index, struct svm_problem prob)
+{
+	int i;
+	for(i=0;i<prob.l;i++)
+	{
+		if(i!=index)
+			weights[i] *= lambda;
+		else
+			weights[i] = weights[i]*lambda + (1.0 - lambda)*1;
 	}
 }
 
@@ -331,12 +395,66 @@ int main (int argc, const char ** argv)
 
 	// Step 1
 	printf("erster Aufruf... \n");
-	int max_p = find_max_dotproduct( x, y, prob_p);
+	double max_p;
+	int max_p_index = find_max_dotproduct( x, y, prob_p, max_p);
 
 	printf("zweiter Aufruf... \n");
-	int max_q = find_max_dotproduct( y, x, prob_q);
+	double max_q;
+	int max_q_index = find_max_dotproduct( y, x, prob_q, max_q);
 
 	printf("max_p = %d   max_q = %d \n", max_p, max_q);
+
+	double lambda;
+
+	if(max_p > max_q) {
+		double zaehler = compute_dot_product_with_differences(y, prob_p.x[max_p_index], x, prob_p.x[max_p_index]);
+		double nenner = compute_dot_product_with_differences(x, prob_p.x[max_p_index], x, prob_p.x[max_p_index]);
+
+		lambda = zaehler / nenner;		
+
+		add_proportional(x,prob_p.x[max_p_index], lambda);
+		add_to_weights(x_weights, lambda, max_p_index, prob_p);
+
+		max_p_index = find_max_dotproduct( x, y, prob_p, max_p); // max_p updaten
+	} else
+	{
+		// Gilbertschritt im Polytop Q
+		// \lambda = <p-q_i, q-q_i> / <q-q_i, q-q_i>
+
+		// <x - max_q_index, y - max_q_index> /  <y - max_q_index, y - max_q_index>
+
+		double zaehler = compute_dot_product_with_differences(x, prob_q.x[max_q_index], y, prob_q.x[max_q_index]);
+		double nenner = compute_dot_product_with_differences(y, prob_q.x[max_q_index], y, prob_q.x[max_q_index]);
+
+		lambda = zaehler / nenner;
+		add_proportional(y,prob_q.y[max_q_index], lambda);
+		add_to_weights(y_weights, lambda, max_q_index, prob_q);
+		
+		max_q_index = find_max_dotproduct( y, x, prob_q, max_q); // max_q updaten
+	}
+
+	//duality gap
+	// absolute duality gap
+	// berechne max_p und max_q neu, dann adg = max_p+max_q
+
+	double adg = max_p + max_q;
+
+	// relative duality gap
+	// adg / ||p-q||^2 - adg
+	// adg / <p-q, p-q> - adg
+
+	double rdg_nenner = compute_dot_product_with_differences(x,y,x,y) - adg;
+	double rdg;
+
+	if(rdg_nenner <= 0)
+	{
+		rdg = HUGE_VAL;
+	} else
+	{
+		rdg = adg / rdg_nenner;
+	}
+
+	printf("relative duality gap = %f \n", rdg);
 
     return 0;
 }
