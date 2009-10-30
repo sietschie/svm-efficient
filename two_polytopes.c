@@ -215,7 +215,7 @@ void compute_vector_from_weights(double* weights, struct svm_node* vector, const
 	}	
 }
 
-double compute_dot_product_with_differences(const struct svm_node* vector, const struct svm_node* x, const struct svm_node* y) // <p - y_i, x_i - y_i>
+double compute_dot_product_with_differences3(const struct svm_node* vector, const struct svm_node* x, const struct svm_node* y) // <p - y_i, x_i - y_i>
 {
 	double sum = 0;
 	while(x->index != -1 && vector->index != -1)
@@ -242,21 +242,22 @@ double compute_dot_product_with_differences(const struct svm_node* vector, const
 
 
 
-int find_max_dotproduct(const struct svm_node* x, const struct svm_node* y, struct svm_problem prob, double &max)
+int find_max_dotproduct(const struct svm_node* x, const struct svm_node* y, struct svm_problem prob, double *max_ret)
 {
 	int i;
-	max = -HUGE_VAL; //compute_dot_product_with_differences(prob.x[0], x, y);
+	double max = -HUGE_VAL; //compute_dot_product_with_differences(prob.x[0], x, y);
 	int max_index = -1;
 	for(i=0;i<prob.l;i++)
 //	i=1;
 	{
-		double dotproduct = compute_dot_product_with_differences(prob.x[i], x, y);
+		double dotproduct = compute_dot_product_with_differences3(prob.x[i], x, y);
 		printf("index = %d dotproduct = %f  max = %f \n", i, dotproduct, max);
 		if(dotproduct > max) {
 			max = dotproduct;
 			max_index = i;
 		}
 	}
+	(*max_ret) = max; //todo: watch closely
 	return max_index;
 }
 
@@ -269,12 +270,12 @@ void print_vector( const struct svm_node* vector)
 	}
 }
 
-double compute_dot_product_with_differences(const struct svm_node* a, const struct svm_node* b, const struct svm_node* c, const struct svm_node* d) // <a - b, c - d>
+double compute_dot_product_with_differences4(const struct svm_node* a, const struct svm_node* b, const struct svm_node* c, const struct svm_node* d) // <a - b, c - d>
 {
 	double sum = 0;
 	while(a->index != -1 && b->index != -1 && c->index != -1 && d->index != -1)
 	{
-		if(a->index == b->index == c->index == d->index == )
+		if(a->index == b->index == c->index == d->index )
 		{
 			//printf("sum = %f  vector = %f  x = %f  y = %f \n", sum, vector->value, x->value, y->value);
 			sum += (a->value - b->value)*(c->value - d->value);
@@ -287,7 +288,7 @@ double compute_dot_product_with_differences(const struct svm_node* a, const stru
 		{
 			//printf("missing element 2.. \n"); // todo: was tun bei fehlenden werten?
 
-			struct svm_node* min = a;
+			const struct svm_node* min = a;
 			if(min->index > b->index)	min=b;
 			if(min->index > c->index)	min=c;
 			if(min->index > d->index)	min=d;
@@ -303,16 +304,16 @@ double compute_dot_product_with_differences(const struct svm_node* a, const stru
 	return sum;
 }
 
-void add_proportional(const struct svm_node* a, const struct svm_node* b, double lambda)
+void add_proportional(struct svm_node* a, const struct svm_node* b, double lambda)
 {
 	while(a->index != -1 && b->index != -1) {
-		if(a->index == b->index)
+		if(a->index == b->index) {	
 			a->value = lambda*a->value + (1.0 - lambda)* b->value;
 			++a;
 			++b;
 		} else {
 			if(a->index > b->index)
-				++b;
+				++b;	
 			else {
 				++a; ++b; }
 		}
@@ -396,26 +397,26 @@ int main (int argc, const char ** argv)
 	// Step 1
 	printf("erster Aufruf... \n");
 	double max_p;
-	int max_p_index = find_max_dotproduct( x, y, prob_p, max_p);
+	int max_p_index = find_max_dotproduct( x, y, prob_p, &max_p);
 
 	printf("zweiter Aufruf... \n");
 	double max_q;
-	int max_q_index = find_max_dotproduct( y, x, prob_q, max_q);
+	int max_q_index = find_max_dotproduct( y, x, prob_q, &max_q);
 
-	printf("max_p = %d   max_q = %d \n", max_p, max_q);
+	printf("max_p = %f   max_q = %f \n", max_p, max_q);
 
 	double lambda;
 
 	if(max_p > max_q) {
-		double zaehler = compute_dot_product_with_differences(y, prob_p.x[max_p_index], x, prob_p.x[max_p_index]);
-		double nenner = compute_dot_product_with_differences(x, prob_p.x[max_p_index], x, prob_p.x[max_p_index]);
+		double zaehler = compute_dot_product_with_differences4(y, prob_p.x[max_p_index], x, prob_p.x[max_p_index]);
+		double nenner = compute_dot_product_with_differences4(x, prob_p.x[max_p_index], x, prob_p.x[max_p_index]);
 
 		lambda = zaehler / nenner;		
 
 		add_proportional(x,prob_p.x[max_p_index], lambda);
 		add_to_weights(x_weights, lambda, max_p_index, prob_p);
 
-		max_p_index = find_max_dotproduct( x, y, prob_p, max_p); // max_p updaten
+		max_p_index = find_max_dotproduct( x, y, prob_p, &max_p); // max_p updaten
 	} else
 	{
 		// Gilbertschritt im Polytop Q
@@ -423,14 +424,14 @@ int main (int argc, const char ** argv)
 
 		// <x - max_q_index, y - max_q_index> /  <y - max_q_index, y - max_q_index>
 
-		double zaehler = compute_dot_product_with_differences(x, prob_q.x[max_q_index], y, prob_q.x[max_q_index]);
-		double nenner = compute_dot_product_with_differences(y, prob_q.x[max_q_index], y, prob_q.x[max_q_index]);
+		double zaehler = compute_dot_product_with_differences4(x, prob_q.x[max_q_index], y, prob_q.x[max_q_index]);
+		double nenner = compute_dot_product_with_differences4(y, prob_q.x[max_q_index], y, prob_q.x[max_q_index]);
 
 		lambda = zaehler / nenner;
-		add_proportional(y,prob_q.y[max_q_index], lambda);
+		add_proportional(y,prob_q.x[max_q_index], lambda);
 		add_to_weights(y_weights, lambda, max_q_index, prob_q);
 		
-		max_q_index = find_max_dotproduct( y, x, prob_q, max_q); // max_q updaten
+		max_q_index = find_max_dotproduct( y, x, prob_q, &max_q); // max_q updaten
 	}
 
 	//duality gap
@@ -443,7 +444,7 @@ int main (int argc, const char ** argv)
 	// adg / ||p-q||^2 - adg
 	// adg / <p-q, p-q> - adg
 
-	double rdg_nenner = compute_dot_product_with_differences(x,y,x,y) - adg;
+	double rdg_nenner = compute_dot_product_with_differences4(x,y,x,y) - adg;
 	double rdg;
 
 	if(rdg_nenner <= 0)
