@@ -222,7 +222,7 @@ double compute_dot_product_with_differences3(const struct svm_node* vector, cons
 	{
 		if(x->index == vector->index)
 		{
-			//printf("sum = %f  vector = %f  x = %f  y = %f \n", sum, vector->value, x->value, y->value);
+			printf("sum = %f  vector = %f  x = %f  y = %f \n", sum, vector->value, x->value, y->value);
 			sum += (vector->value - y->value)*(x->value - y->value);
 			++x;
 			++y;
@@ -230,7 +230,7 @@ double compute_dot_product_with_differences3(const struct svm_node* vector, cons
 		}
 		else
 		{
-			//printf("missing element 2.. \n");
+			printf("missing element 2.. \n");
 			if(x->index > vector->index)
 				++vector;
 			else {
@@ -275,9 +275,9 @@ double compute_dot_product_with_differences4(const struct svm_node* a, const str
 	double sum = 0;
 	while(a->index != -1 && b->index != -1 && c->index != -1 && d->index != -1)
 	{
-		if(a->index == b->index == c->index == d->index )
+		if((a->index == b->index) && (c->index == d->index) &&  (a->index == d->index))
 		{
-			//printf("sum = %f  vector = %f  x = %f  y = %f \n", sum, vector->value, x->value, y->value);
+			//printf("sum = %f  a = %f  b = %f  c = %f  d = %f\n", sum, a->value, b->value, c->value, d->value);
 			sum += (a->value - b->value)*(c->value - d->value);
 			++a;
 			++b;
@@ -286,14 +286,27 @@ double compute_dot_product_with_differences4(const struct svm_node* a, const str
 		}
 		else
 		{
-			//printf("missing element 2.. \n"); // todo: was tun bei fehlenden werten?
+			//printf("missing element 2.. a=%d b=%d c=%d e=%d\n", a->index, b->index, c->index, d->index); // todo: was tun bei fehlenden werten?
 
-			const struct svm_node* min = a;
+			if(a->index <= b->index && a->index <= c->index && a->index <= d->index)
+				++a; 
+
+			if(b->index <= a->index && b->index <= c->index && b->index <= d->index)
+				++b; 
+
+			if(c->index <= a->index && c->index <= b->index && c->index <= d->index)
+				++c; 
+
+			if(d->index <= a->index && d->index <= b->index && d->index <= c->index)
+				++d; 
+			//printf("missing element 3.. a=%d b=%d c=%d e=%d\n", a->index, b->index, c->index, d->index); // todo: was tun bei fehlenden werten?
+
+/*			const struct svm_node* min = a;
 			if(min->index > b->index)	min=b;
 			if(min->index > c->index)	min=c;
 			if(min->index > d->index)	min=d;
 		
-			++min;
+			++min;*/
 
 			//if(x->index > vector->index)
 			//	++vector;
@@ -403,22 +416,35 @@ int main (int argc, const char ** argv)
 	double max_q;
 	int max_q_index = find_max_dotproduct( y, x, prob_q, &max_q);
 
-	printf("max_p = %f   max_q = %f \n", max_p, max_q);
 
+int j;
+
+	for(j=0;j<2;j++)
+	{
+	printf("max_p = %f   max_q = %f \n", max_p, max_q);
+	
 	double lambda;
 
 	if(max_p > max_q) {
+		printf("if(max_p > max_q)\n");
 		double zaehler = compute_dot_product_with_differences4(y, prob_p.x[max_p_index], x, prob_p.x[max_p_index]);
+		printf("1 ");
 		double nenner = compute_dot_product_with_differences4(x, prob_p.x[max_p_index], x, prob_p.x[max_p_index]);
+		printf("2 ");
 
 		lambda = zaehler / nenner;		
+		printf("3 ");
 
 		add_proportional(x,prob_p.x[max_p_index], lambda);
+		printf("4 ");
 		add_to_weights(x_weights, lambda, max_p_index, prob_p);
+		printf("5 ");
 
 		max_p_index = find_max_dotproduct( x, y, prob_p, &max_p); // max_p updaten
+		printf("6 ");
 	} else
 	{
+		printf("if(max_p <= max_q)\n");
 		// Gilbertschritt im Polytop Q
 		// \lambda = <p-q_i, q-q_i> / <q-q_i, q-q_i>
 
@@ -440,6 +466,8 @@ int main (int argc, const char ** argv)
 
 	double adg = max_p + max_q;
 
+	printf("absolute duality gap = %f \n", adg);
+
 	// relative duality gap
 	// adg / ||p-q||^2 - adg
 	// adg / <p-q, p-q> - adg
@@ -456,6 +484,8 @@ int main (int argc, const char ** argv)
 	}
 
 	printf("relative duality gap = %f \n", rdg);
+
+	}
 
     return 0;
 }
