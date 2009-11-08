@@ -120,23 +120,5 @@ void read_problem(const char *filename)
 		x_space[j++].index = -1;
 	}
 
-	//if(param.gamma == 0 && max_index > 0)
-	//	param.gamma = 1.0/max_index;
-
-	/*if(param.kernel_type == PRECOMPUTED)
-		for(i=0;i<prob.l;i++)
-		{
-			if (prob.x[i][0].index != 0)
-			{
-				fprintf(stderr,"Wrong input format: first column must be 0:sample_serial_number\n");
-				exit(1);
-			}
-			if ((int)prob.x[i][0].value <= 0 || (int)prob.x[i][0].value > max_index)
-			{
-				fprintf(stderr,"Wrong input format: sample_serial_number out of range\n");
-				exit(1);
-			}
-		}*/
-
 	fclose(fp);
 }

@@ -267,7 +267,7 @@ int main (int argc, const char ** argv)
 
     int j;
 
-    for (j=0;j<100;j++)
+    for (j=0;j<10;j++)
     {
 //        printf(" ... P = %d (%f), Q = %d (%f)\n", max_p_index, max_p, max_q_index, max_q);
         double lambda;
