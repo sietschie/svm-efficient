@@ -57,8 +57,10 @@ void compute_vector_from_weights(double* weights, struct svm_node* vector, const
             else
             {
                 //printf("missing element: %d  %d  \n", in->index, out->index);
-                if (in->index > out->index)
+                if (in->index > out->index) {
+                    out->value = 0.0;
                     ++out;
+                }
                 else
                     ++in;
             }
@@ -267,11 +269,11 @@ int main (int argc, const char ** argv)
 
     int j;
 
-    for (j=0;j<10;j++)
+    for (j=0;j<2000;j++)
     {
 //        printf(" ... P = %d (%f), Q = %d (%f)\n", max_p_index, max_p, max_q_index, max_q);
         double lambda;
-//            printf(" max_q_index = %d , max_p_index = %d \n", max_q_index, max_p_index);
+            printf(" max_q_index = %d , max_p_index = %d \n", max_q_index, max_p_index);
 
         if (max_p > max_q)
         {
@@ -346,6 +348,7 @@ int main (int argc, const char ** argv)
 
         if (rdg_nenner <= 0)
         {
+            printf("set huge value... \n");
             rdg = HUGE_VAL;
         }
         else
