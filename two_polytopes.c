@@ -116,19 +116,23 @@ void print_vector( const struct svm_node* vector)
 {
     while (vector->index != -1)
     {
-        printf("%d: %f \n", vector->index, vector->value);
+        printf("%d: %f  ", vector->index, vector->value);
         ++vector;
     }
+    printf("\n");
 }
 
 double dot(const struct svm_node *px, const struct svm_node *py)
 {
+//    print_vector(px);
+//    print_vector(py);
 	double sum = 0;
 	while(px->index != -1 && py->index != -1)
 	{
 		if(px->index == py->index)
 		{
 			sum += px->value * py->value;
+		    //printf("  dot: %f = %f * %f, sum = %f, index = %d \n", px->value * py->value, px->value, py->value, sum, px->index);
 			++px;
 			++py;
 		}
@@ -142,6 +146,32 @@ double dot(const struct svm_node *px, const struct svm_node *py)
 	}
 	return sum;
 }
+
+double dotd(const struct svm_node *px, const struct svm_node *py)
+{
+    print_vector(px);
+    print_vector(py);
+	double sum = 0;
+	while(px->index != -1 && py->index != -1)
+	{
+		if(px->index == py->index)
+		{
+			sum += px->value * py->value;
+		    printf("  dot: %f = %f * %f, sum = %f, index = %d \n", px->value * py->value, px->value, py->value, sum, px->index);
+			++px;
+			++py;
+		}
+		else
+		{
+			if(px->index > py->index)
+				++py;
+			else
+				++px;
+		}
+	}
+	return sum;
+}
+
 
 int find_max_dotproduct_weights(double* weights_x, double* weights_y, struct svm_problem prob_x, struct svm_problem prob_y, double *max_ret)
 {
@@ -188,9 +218,9 @@ int find_max_dotproduct(const struct svm_node* x, const struct svm_node* y, stru
     int i;
     double max = -HUGE_VAL; //compute_dot_product_with_differences(prob.x[0], x, y);
     int max_index = -1;
-//    for (i=0;i<prob.l;i++)
+    for (i=0;i<prob.l;i++)
 //	for(i=0;i<10;i++)
-	i=8;
+//	i=8;
     {
         //print_vector(x);
         double dotproduct = compute_dot_product_with_differences4(prob.x[i], x, y, x);
@@ -198,7 +228,7 @@ int find_max_dotproduct(const struct svm_node* x, const struct svm_node* y, stru
         {
             max = dotproduct;
             max_index = i;
-            printf("index = %d dotproduct = %f  max = %e \n", i, dotproduct, max);
+            //printf("index = %d dotproduct = %f  max = %e \n", i, dotproduct, max);
         }
 //        printf("index = %d dotproduct = %f  max = %e \n", i, dotproduct, max);
         //print_vector(prob.x[0]);
@@ -241,12 +271,12 @@ void add_to_weights(double* weights, double lambda, int index, struct svm_proble
     int i;
     for (i=0;i<prob.l;i++)
     {
-    	//printf("     old=%f   ",weights[i]);
+    	printf("index = %d     lambda = %f     old=%f   ", i, lambda, weights[i]);
         if (i!=index)
             weights[i] *= lambda;
         else
             weights[i] = weights[i]*lambda + (1.0 - lambda)*1;
-        //printf("    new=%f  \n", weights[i]);
+        printf("    new=%f  \n", weights[i]);
     }
 }
 
@@ -255,14 +285,16 @@ void print_weights(double* weights, struct svm_problem prob)
 	int i;
 	for(i=0;i<prob.l;i++)
 	{
-		if(weights[i] != 0.0)
-			printf("%d:\t%f\n",i,weights[i]);
+//		if(weights[i] != 0.0)
+			printf("%d:\t%f  ",i,weights[i]);
 	}
+	printf("\n");
 }
 
-double compute_zaehler(double* x_weights, double* y_weights, const struct svm_node* x,  struct svm_problem prob_x, struct svm_problem prob_y)
+double compute_zaehler(double* x_weights, double* y_weights, const struct svm_node* x,  struct svm_problem prob_y, struct svm_problem prob_x)
 {
     double sum = 0.0;
+    double old_sum = 0.0;
     int j, k;
     for(j=0;j<prob_x.l;j++){
         for(k=0;k<prob_y.l;k++)
@@ -270,14 +302,24 @@ double compute_zaehler(double* x_weights, double* y_weights, const struct svm_no
             sum += x_weights[j] * y_weights[k] * dot(prob_x.x[j], prob_y.x[k]);
         }
     }
+//    printf("1 sum = %f  ", sum);
+//    old_sum = sum;
+
     for(j=0;j<prob_x.l;j++)
     {
-        sum -= x_weights[j] * dot(prob_x.x[j], x);
+        sum -= x_weights[j] * dotd(prob_x.x[j], x);
+//        printf(" sum = %f, x_weights[j] = %f j = %d \n", sum, x_weights[j], j);
+//        print_vector(prob_x.x[j]);
     }
+//    printf("2 sum = %f  ", sum - old_sum);
+//    old_sum = sum;
     for(k=0;k<prob_y.l;k++) {
         sum -= y_weights[k] * dot(prob_y.x[k], x);
     }
+//    printf("3 sum = %f  ", sum - old_sum);
+//    old_sum = sum;
     sum += dot(x,x);
+//    printf("4sum = %f  \n", sum - old_sum);
     return sum;
 }
 
@@ -341,6 +383,11 @@ int main (int argc, const char ** argv)
     compute_vector_from_weights(x_weights, x, prob_p);
     compute_vector_from_weights(y_weights, y, prob_q);
 
+    print_vector(x);
+    print_weights(x_weights, prob_p);
+    print_vector(y);
+    print_weights(y_weights, prob_q);
+
 
     // Step 1
     printf("Maximales Kreuzprodukt suchen... \n");
@@ -361,11 +408,7 @@ int main (int argc, const char ** argv)
 
     int j;
 
-    for (j=0;j<10;j++)
-    max_p, max_p_weights, max_p_index, max_p_index_weights);
-
-
-    for (j=0;j<0;j++)
+    for (j=0;j<3;j++)
     {
     printf("max_q = %f  %f, index = %d %d    max_p = %f  %f, index = %d %d \n", max_q, max_q_weights, max_q_index, max_q_index_weights,
     max_p, max_p_weights, max_p_index, max_p_index_weights);
@@ -394,6 +437,10 @@ int main (int argc, const char ** argv)
             add_proportional(x,prob_p.x[max_p_index], lambda);
             add_to_weights(x_weights, lambda, max_p_index, prob_p);
 
+    print_vector(x);
+    print_weights(x_weights, prob_p);
+    print_vector(y);
+    print_weights(y_weights, prob_q);
 			//print_weights(x_weights,prob_p);
 
 
@@ -417,6 +464,12 @@ int main (int argc, const char ** argv)
             printf("2zaehler = %f  %f \n", zaehler, compute_zaehler(x_weights, y_weights, prob_q.x[max_q_index], prob_q, prob_p) );
 //            printf("zaehler=%f  nenner=%f \n", zaehler, nenner);
 
+            print_vector(x);
+            print_weights(x_weights, prob_p);
+            print_vector(y);
+            print_weights(y_weights, prob_q);
+            print_vector(prob_q.x[max_q_index]);
+
             lambda = zaehler / nenner;
 
             if(zaehler == 0.0 && nenner == 0.0) lambda = 0.0;
@@ -425,6 +478,11 @@ int main (int argc, const char ** argv)
             printf("lambda = %e  zaehler = %e  nenner = %e \n", lambda, zaehler, nenner);
             add_proportional(y,prob_q.x[max_q_index], lambda);
             add_to_weights(y_weights, lambda, max_q_index, prob_q);
+
+    print_vector(x);
+    print_weights(x_weights, prob_p);
+    print_vector(y);
+    print_weights(y_weights, prob_q);
 
             max_q_index = find_max_dotproduct( y, x, prob_q, &max_q); // max_q updaten
             max_q_index_weights = find_max_dotproduct_weights( y_weights, x_weights, prob_q, prob_p, &max_q_weights); // max_p updaten

@@ -6,12 +6,16 @@
 	<string.h>
 	<math.h>
 
+1257013360 
+
 1257178704 source:p:\documents and settings\goering\my documents\my dropbox\uni\sa-cuda\svm\readsvm.c
 	<stdio.h>
 	<stdlib.h>
 	<errno.h>
 	<string.h>
 	"readsvm.h"
+
+1257806272 "
 
 1257178644 p:\documents and settings\goering\my documents\my dropbox\uni\sa-cuda\svm\readsvm.h
 
@@ -39,7 +43,22 @@
 
 1257698847 c:\documents and settings\goering\my documents\my dropbox\uni\sa-cuda\svm-withweights\readsvm.h
 
-1257802079 source:c:\documents and settings\goering\my documents\my dropbox\uni\sa-cuda\svm-withweights\two_polytopes.c
+1257806272 source:c:\documents and settings\goering\my documents\my dropbox\uni\sa-cuda\svm-withweights\two_polytopes.c
+	<stdio.h>
+	<stdlib.h>
+	<math.h>
+	"readsvm.h"
+
+1257698847 source:/home/goering/Dropbox/uni/sa-cuda/svm-withweights/readsvm.c
+	<stdio.h>
+	<stdlib.h>
+	<errno.h>
+	<string.h>
+	"readsvm.h"
+
+1257698847 /home/goering/Dropbox/uni/sa-cuda/svm-withweights/readsvm.h
+
+1257932427 source:/home/goering/Dropbox/uni/sa-cuda/svm-withweights/two_polytopes.c
 	<stdio.h>
 	<stdlib.h>
 	<math.h>
