@@ -6,7 +6,7 @@
 	<string.h>
 	<math.h>
 
-1257178704 source:p:\documents and settings\goering\my documents\my dropbox\uni\sa-cuda\svm\readsvm.c
+1257696288 source:p:\documents and settings\goering\my documents\my dropbox\uni\sa-cuda\svm\readsvm.c
 	<stdio.h>
 	<stdlib.h>
 	<errno.h>
@@ -25,6 +25,12 @@
 1257178644 c:\documents and settings\goering\my documents\my dropbox\uni\sa-cuda\svm\readsvm.h
 
 1257784842 source:c:\documents and settings\goering\my documents\my dropbox\uni\sa-cuda\svm\two_polytopes.c
+	<stdio.h>
+	<stdlib.h>
+	<math.h>
+	"readsvm.h"
+
+1258309544 source:p:\documents and settings\goering\my documents\my dropbox\uni\sa-cuda\svm\two_polytopes.c
 	<stdio.h>
 	<stdlib.h>
 	<math.h>

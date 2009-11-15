@@ -193,7 +193,7 @@ void print_weights(double* weights, struct svm_problem prob)
 	int i;
 	for(i=0;i<prob.l;i++)
 	{
-		if(weights[i] != 0.0)
+		//if(weights[i] != 0.0)
 			printf("%d:\t%f\n",i,weights[i]);
 	}
 }
@@ -269,13 +269,13 @@ int main (int argc, const char ** argv)
 
     int j;
 
-    for (j=0;j<2000;j++)
+    for (j=0;j<3;j++)
     {
 //        printf(" ... P = %d (%f), Q = %d (%f)\n", max_p_index, max_p, max_q_index, max_q);
         double lambda;
             printf(" max_q_index = %d , max_p_index = %d \n", max_q_index, max_p_index);
 
-        if (max_p > max_q)
+        if (max_p >= max_q)
         {
 //            printf("  max_p > max_q \n");
             double zaehler = compute_dot_product_with_differences4(y, prob_p.x[max_p_index], x, prob_p.x[max_p_index]);
@@ -286,10 +286,12 @@ int main (int argc, const char ** argv)
             lambda = zaehler / nenner;
 
             if(lambda < 0.0)	lambda = 0.0;
+            if(lambda > 1.0)	lambda = 1.0;
+
 
 			//print_weights(x_weights,prob_p);
 
-//            printf("lambda = %f  zaehler = %f  nenner = %f \n", lambda, zaehler, nenner);
+            printf("lambda = %f  zaehler = %f  nenner = %f \n", lambda, zaehler, nenner);
 
             add_proportional(x,prob_p.x[max_p_index], lambda);
             add_to_weights(x_weights, lambda, max_p_index, prob_p);
@@ -298,6 +300,7 @@ int main (int argc, const char ** argv)
 
 
             max_p_index = find_max_dotproduct( x, y, prob_p, &max_p); // max_p updaten
+            max_q_index = find_max_dotproduct( y, x, prob_q, &max_q); // max_q updaten
         }
         else
         {
@@ -315,14 +318,16 @@ int main (int argc, const char ** argv)
 
             lambda = zaehler / nenner;
 
-            if(zaehler == 0.0 && nenner == 0.0) lambda = 0.0;
+//            if(zaehler == 0.0 && nenner == 0.0) lambda = 0.0;
             if(lambda < 0.0)	lambda = 0.0;
+            if(lambda > 1.0)	lambda = 1.0;
 
-//            printf("lambda = %e  zaehler = %e  nenner = %e \n", lambda, zaehler, nenner);
+            printf("lambda = %e  zaehler = %e  nenner = %e \n", lambda, zaehler, nenner);
             add_proportional(y,prob_q.x[max_q_index], lambda);
             add_to_weights(y_weights, lambda, max_q_index, prob_q);
 
             max_q_index = find_max_dotproduct( y, x, prob_q, &max_q); // max_q updaten
+            max_p_index = find_max_dotproduct( y, x, prob_p, &max_p); // max_p updaten
         }
 
         //duality gap
@@ -331,13 +336,14 @@ int main (int argc, const char ** argv)
 
         double adg = max_p + max_q;
 
-        printf("absolute duality gap = %e \n", adg);
+        printf("max_p = %f  max_q = %f ", max_p, max_q);
+        printf("adg = %f ", adg);
 
         // relative duality gap
         // adg / ||p-q||^2 - adg
         // adg / <p-q, p-q> - adg
 
-		printf("<x-y,x-y> = %e\n" , compute_dot_product_with_differences4(x,y,x,y));
+		printf("<x-y,x-y> = %f" , compute_dot_product_with_differences4(x,y,x,y));
 
 		//print_vector(x);
 		//print_vector(y);
@@ -356,7 +362,9 @@ int main (int argc, const char ** argv)
             rdg = adg / rdg_nenner;
         }
 
-        printf("relative duality gap = %f \n", rdg);
+        printf("rdg = %f \n", rdg);
+		print_weights(x_weights, prob_p);
+		print_weights(y_weights, prob_q);
 
     }
 
