@@ -271,12 +271,12 @@ void add_to_weights(double* weights, double lambda, int index, struct svm_proble
     int i;
     for (i=0;i<prob.l;i++)
     {
-    	printf("index = %d     lambda = %f     old=%f   ", i, lambda, weights[i]);
+    	//printf("index = %d     lambda = %f     old=%f   ", i, lambda, weights[i]);
         if (i!=index)
             weights[i] *= lambda;
         else
             weights[i] = weights[i]*lambda + (1.0 - lambda)*1;
-        printf("    new=%f  \n", weights[i]);
+        //printf("    new=%f  \n", weights[i]);
     }
 }
 
@@ -307,7 +307,7 @@ double compute_zaehler(double* x_weights, double* y_weights, const struct svm_no
 
     for(j=0;j<prob_x.l;j++)
     {
-        sum -= x_weights[j] * dotd(prob_x.x[j], x);
+        sum -= x_weights[j] * dot(prob_x.x[j], x);
 //        printf(" sum = %f, x_weights[j] = %f j = %d \n", sum, x_weights[j], j);
 //        print_vector(prob_x.x[j]);
     }
@@ -315,6 +315,34 @@ double compute_zaehler(double* x_weights, double* y_weights, const struct svm_no
 //    old_sum = sum;
     for(k=0;k<prob_y.l;k++) {
         sum -= y_weights[k] * dot(prob_y.x[k], x);
+    }
+//    printf("3 sum = %f  ", sum - old_sum);
+//    old_sum = sum;
+    sum += dot(x,x);
+//    printf("4sum = %f  \n", sum - old_sum);
+    return sum;
+}
+
+
+double compute_nenner(double* y_weights, const struct svm_node* x,  struct svm_problem prob_y)
+{
+    double sum = 0.0;
+    double old_sum = 0.0;
+    int j, k;
+    for(j=0;j<prob_y.l;j++){
+        for(k=0;k<prob_y.l;k++)
+        {
+            sum += y_weights[j] * y_weights[k] * dot(prob_y.x[j], prob_y.x[k]);
+        }
+    }
+//    printf("1 sum = %f  ", sum);
+//    old_sum = sum;
+
+    for(j=0;j<prob_y.l;j++)
+    {
+        sum -= 2 * y_weights[j] * dot(prob_y.x[j], x);
+//        printf(" sum = %f, x_weights[j] = %f j = %d \n", sum, x_weights[j], j);
+//        print_vector(prob_x.x[j]);
     }
 //    printf("3 sum = %f  ", sum - old_sum);
 //    old_sum = sum;
@@ -383,10 +411,10 @@ int main (int argc, const char ** argv)
     compute_vector_from_weights(x_weights, x, prob_p);
     compute_vector_from_weights(y_weights, y, prob_q);
 
-    print_vector(x);
-    print_weights(x_weights, prob_p);
-    print_vector(y);
-    print_weights(y_weights, prob_q);
+//    print_vector(x);
+//    print_weights(x_weights, prob_p);
+//    print_vector(y);
+//    print_weights(y_weights, prob_q);
 
 
     // Step 1
@@ -410,21 +438,25 @@ int main (int argc, const char ** argv)
 
     for (j=0;j<3;j++)
     {
-    printf("max_q = %f  %f, index = %d %d    max_p = %f  %f, index = %d %d \n", max_q, max_q_weights, max_q_index, max_q_index_weights,
-    max_p, max_p_weights, max_p_index, max_p_index_weights);
+    //printf("max_q = %f  %f, index = %d %d    max_p = %f  %f, index = %d %d \n", max_q, max_q_weights, max_q_index, max_q_index_weights,
+    //max_p, max_p_weights, max_p_index, max_p_index_weights);
 //        printf(" ... P = %d (%f), Q = %d (%f)\n", max_p_index, max_p, max_q_index, max_q);
         double lambda;
-            printf(" max_q_index = %d , max_p_index = %d \n", max_q_index, max_p_index);
+            //printf(" max_q_index = %d , max_p_index = %d \n", max_q_index, max_p_index);
 
         if (max_p > max_q)
         {
 //            printf("  max_p > max_q \n");
-            double zaehler = compute_dot_product_with_differences4(y, prob_p.x[max_p_index], x, prob_p.x[max_p_index]);
+            /*double zaehler = compute_dot_product_with_differences4(y, prob_p.x[max_p_index], x, prob_p.x[max_p_index]);
             double nenner = compute_dot_product_with_differences4(x, prob_p.x[max_p_index], x, prob_p.x[max_p_index]);
 
 //            printf("zaehler=%f  nenner=%f \n", zaehler, nenner);
 
             printf("1zaehler = %f  %f \n", zaehler, compute_zaehler(y_weights, x_weights, prob_p.x[max_p_index], prob_p, prob_q) );
+            printf("1nenner = %f  %f \n", nenner, compute_nenner(x_weights, prob_p.x[max_p_index], prob_p) );
+*/
+            double zaehler = compute_zaehler(y_weights, x_weights, prob_p.x[max_p_index], prob_p, prob_q);
+            double nenner = compute_nenner(x_weights, prob_p.x[max_p_index], prob_p);
 
             lambda = zaehler / nenner;
 
@@ -437,10 +469,10 @@ int main (int argc, const char ** argv)
             add_proportional(x,prob_p.x[max_p_index], lambda);
             add_to_weights(x_weights, lambda, max_p_index, prob_p);
 
-    print_vector(x);
-    print_weights(x_weights, prob_p);
-    print_vector(y);
-    print_weights(y_weights, prob_q);
+//    print_vector(x);
+//    print_weights(x_weights, prob_p);
+//    print_vector(y);
+//    print_weights(y_weights, prob_q);
 			//print_weights(x_weights,prob_p);
 
 
@@ -457,33 +489,39 @@ int main (int argc, const char ** argv)
             // <x - max_q_index, y - max_q_index> /  <y - max_q_index, y - max_q_index>
 
 
-            double zaehler = compute_dot_product_with_differences4(x, prob_q.x[max_q_index], y, prob_q.x[max_q_index]);
+            /*double zaehler = compute_dot_product_with_differences4(x, prob_q.x[max_q_index], y, prob_q.x[max_q_index]);
             double nenner = compute_dot_product_with_differences4(y, prob_q.x[max_q_index], y, prob_q.x[max_q_index]);
 
 
             printf("2zaehler = %f  %f \n", zaehler, compute_zaehler(x_weights, y_weights, prob_q.x[max_q_index], prob_q, prob_p) );
+            printf("2nenner = %f  %f \n", nenner, compute_nenner(y_weights, prob_q.x[max_q_index], prob_q) );
+*/
+
+            double zaehler = compute_zaehler(x_weights, y_weights, prob_q.x[max_q_index], prob_q, prob_p);
+            double nenner = compute_nenner(y_weights, prob_q.x[max_q_index], prob_q);
+
 //            printf("zaehler=%f  nenner=%f \n", zaehler, nenner);
 
-            print_vector(x);
-            print_weights(x_weights, prob_p);
-            print_vector(y);
-            print_weights(y_weights, prob_q);
-            print_vector(prob_q.x[max_q_index]);
+//            print_vector(x);
+//            print_weights(x_weights, prob_p);
+//            print_vector(y);
+//            print_weights(y_weights, prob_q);
+//            print_vector(prob_q.x[max_q_index]);
 
             lambda = zaehler / nenner;
 
             if(zaehler == 0.0 && nenner == 0.0) lambda = 0.0;
             if(lambda < 0.0)	lambda = 0.0;
 
-            printf("lambda = %e  zaehler = %e  nenner = %e \n", lambda, zaehler, nenner);
+            //printf("lambda = %e  zaehler = %e  nenner = %e \n", lambda, zaehler, nenner);
             add_proportional(y,prob_q.x[max_q_index], lambda);
             add_to_weights(y_weights, lambda, max_q_index, prob_q);
 
-    print_vector(x);
+/*    print_vector(x);
     print_weights(x_weights, prob_p);
     print_vector(y);
     print_weights(y_weights, prob_q);
-
+*/
             max_q_index = find_max_dotproduct( y, x, prob_q, &max_q); // max_q updaten
             max_q_index_weights = find_max_dotproduct_weights( y_weights, x_weights, prob_q, prob_p, &max_q_weights); // max_p updaten
         }
