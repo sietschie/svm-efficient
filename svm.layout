@@ -1,10 +1,10 @@
 <?xml version="1.0" encoding="UTF-8" standalone="yes" ?>
 <CodeBlocks_layout_file>
 	<ActiveTarget name="Debug" />
-	<File name="readsvm.c" open="1" top="0" tabpos="2">
+	<File name="readsvm.c" open="0" top="0" tabpos="2">
 		<Cursor position="1045" topLine="59" />
 	</File>
 	<File name="two_polytopes.c" open="1" top="1" tabpos="1">
-		<Cursor position="9326" topLine="316" />
+		<Cursor position="12529" topLine="426" />
 	</File>
 </CodeBlocks_layout_file>
