@@ -324,6 +324,8 @@ int main (int argc, const char ** argv)
             if(lambda < 0.0)	lambda = 0.0;
             if(lambda > 1.0)	lambda = 0.0;
 
+            add_to_weights(x_weights, lambda, max_p_index, prob_p);
+
             // update dotproducts
 
             dot_xi_xi = lambda * lambda * dot_xi_xi
@@ -341,8 +343,8 @@ int main (int argc, const char ** argv)
             }
 
             // find max
-            int max_p_index = -1;
-            double max_p = -HUGE_VAL;
+            max_p_index = -1;
+            max_p = -HUGE_VAL;
             for (i=0;i<prob_p.l;i++) {
                 double sum = dot_yi_x[i] - dot_xi_x[i] - dot_xi_yi + dot_xi_xi;
                 if(sum > max_p)
@@ -352,8 +354,8 @@ int main (int argc, const char ** argv)
                 }
             }
 
-            int max_q_index = -1;
-            double max_q = -HUGE_VAL;
+            max_q_index = -1;
+            max_q = -HUGE_VAL;
             for (i=0;i<prob_q.l;i++) {
                 double sum = dot_xi_y[i] - dot_yi_y[i] - dot_xi_yi + dot_yi_yi;
                 if(sum > max_q)
@@ -363,9 +365,6 @@ int main (int argc, const char ** argv)
                 }
             }
 
-
-
-            add_to_weights(x_weights, lambda, max_p_index, prob_p);
         }
         else
         {
@@ -378,6 +377,8 @@ int main (int argc, const char ** argv)
             if(zaehler == 0.0 && nenner == 0.0) lambda = 0.0;
             if(lambda < 0.0)	lambda = 0.0;
             if(lambda > 1.0)	lambda = 0.0;
+
+            add_to_weights(y_weights, lambda, max_q_index, prob_q);
 
             // update dotproducts
 
@@ -396,8 +397,8 @@ int main (int argc, const char ** argv)
             }
 
             // find max
-            int max_p_index = -1;
-            double max_p = -HUGE_VAL;
+            max_p_index = -1;
+            max_p = -HUGE_VAL;
             for (i=0;i<prob_p.l;i++) {
                 double sum = dot_yi_x[i] - dot_xi_x[i] - dot_xi_yi + dot_xi_xi;
                 if(sum > max_p)
@@ -407,8 +408,8 @@ int main (int argc, const char ** argv)
                 }
             }
 
-            int max_q_index = -1;
-            double max_q = -HUGE_VAL;
+            max_q_index = -1;
+            max_q = -HUGE_VAL;
             for (i=0;i<prob_q.l;i++) {
                 double sum = dot_xi_y[i] - dot_yi_y[i] - dot_xi_yi + dot_yi_yi;
                 if(sum > max_q)
@@ -418,7 +419,6 @@ int main (int argc, const char ** argv)
                 }
             }
 
-            add_to_weights(y_weights, lambda, max_q_index, prob_q);
        }
 
         //duality gap

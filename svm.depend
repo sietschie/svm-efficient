@@ -94,3 +94,18 @@
 	<math.h>
 	"readsvm.h"
 
+1259067199 source:c:\documents and settings\goering\my documents\my dropbox\uni\sa-cuda\svm-bugfixing\readsvm.c
+	<stdio.h>
+	<stdlib.h>
+	<errno.h>
+	<string.h>
+	"readsvm.h"
+
+1259067199 c:\documents and settings\goering\my documents\my dropbox\uni\sa-cuda\svm-bugfixing\readsvm.h
+
+1259068086 source:c:\documents and settings\goering\my documents\my dropbox\uni\sa-cuda\svm-bugfixing\two_polytopes.c
+	<stdio.h>
+	<stdlib.h>
+	<math.h>
+	"readsvm.h"
+
