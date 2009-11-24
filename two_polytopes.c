@@ -285,51 +285,38 @@ int main (int argc, const char ** argv)
 
 
     // find max
-    int max_p_index_e = -1;
-    double max_p_e = -HUGE_VAL;
+    int max_p_index = -1;
+    double max_p = -HUGE_VAL;
     for (i=0;i<prob_p.l;i++) {
         double sum = dot_yi_x[i] - dot_xi_x[i] - dot_xi_yi + dot_xi_xi;
 
-        if(sum > max_p_e)
+        if(sum > max_p)
         {
-            max_p_e = sum;
-            max_p_index_e = i;
+            max_p = sum;
+            max_p_index = i;
         }
     }
 
-    int max_q_index_e = -1;
-    double max_q_e = -HUGE_VAL;
+    int max_q_index = -1;
+    double max_q = -HUGE_VAL;
     for (i=0;i<prob_q.l;i++) {
         double sum = dot_xi_y[i] - dot_yi_y[i] - dot_xi_yi + dot_yi_yi;
-        if(sum > max_q_e)
+        if(sum > max_q)
         {
-            max_q_e = sum;
-            max_q_index_e = i;
+            max_q = sum;
+            max_q_index = i;
         }
     }
-
-
-
-    // Step 1
-    printf("Maximales Kreuzprodukt suchen... \n");
-    double max_p;
-    double max_q;
-
-    int max_p_index = find_max_dotproduct_weights( x_weights, y_weights, prob_p, prob_q, &max_p);
-    int max_q_index = find_max_dotproduct_weights( y_weights, x_weights, prob_q, prob_p, &max_q);
 
     int j;
 
-    for (j=0;j<10;j++)
+    for (j=0;j<3;j++)
     {
         double lambda;
         if (max_p >= max_q)
         {
-            double zaehler = compute_zaehler(y_weights, x_weights, prob_p.x[max_p_index], prob_p, prob_q);
-            double nenner = compute_nenner(x_weights, prob_p.x[max_p_index], prob_p);
-
-            double zaehler_e = dot_xi_yi - dot_yi_x[max_p_index] - dot_xi_x[max_p_index] + dot(prob_p.x[max_p_index], prob_p.x[max_p_index]);
-            double nenner_e = dot_xi_xi - 2* dot_xi_x[max_p_index] +  dot(prob_p.x[max_p_index], prob_p.x[max_p_index]);
+            double zaehler = dot_xi_yi - dot_yi_x[max_p_index] - dot_xi_x[max_p_index] + dot(prob_p.x[max_p_index], prob_p.x[max_p_index]);
+            double nenner = dot_xi_xi - 2* dot_xi_x[max_p_index] +  dot(prob_p.x[max_p_index], prob_p.x[max_p_index]);
 
             lambda = zaehler / nenner;
 
@@ -354,43 +341,37 @@ int main (int argc, const char ** argv)
             }
 
             // find max
-            int max_p_index_e = -1;
-            double max_p_e = -HUGE_VAL;
+            int max_p_index = -1;
+            double max_p = -HUGE_VAL;
             for (i=0;i<prob_p.l;i++) {
                 double sum = dot_yi_x[i] - dot_xi_x[i] - dot_xi_yi + dot_xi_xi;
-                if(sum > max_p_e)
+                if(sum > max_p)
                 {
-                    max_p_e = sum;
-                    max_p_index_e = i;
+                    max_p = sum;
+                    max_p_index = i;
                 }
             }
 
-            int max_q_index_e = -1;
-            double max_q_e = -HUGE_VAL;
+            int max_q_index = -1;
+            double max_q = -HUGE_VAL;
             for (i=0;i<prob_q.l;i++) {
                 double sum = dot_xi_y[i] - dot_yi_y[i] - dot_xi_yi + dot_yi_yi;
-                if(sum > max_q_e)
+                if(sum > max_q)
                 {
-                    max_q_e = sum;
-                    max_q_index_e = i;
+                    max_q = sum;
+                    max_q_index = i;
                 }
             }
 
 
 
             add_to_weights(x_weights, lambda, max_p_index, prob_p);
-
-            max_p_index = find_max_dotproduct_weights( x_weights, y_weights, prob_p, prob_q, &max_p); // max_p updaten
-            max_q_index = find_max_dotproduct_weights( y_weights, x_weights, prob_q, prob_p, &max_q); // max_p updaten
         }
         else
         {
 
-            double zaehler = compute_zaehler(x_weights, y_weights, prob_q.x[max_q_index], prob_q, prob_p);
-            double nenner = compute_nenner(y_weights, prob_q.x[max_q_index], prob_q);
-
-            double zaehler_e = dot_xi_yi - dot_xi_y[max_q_index] - dot_yi_y[max_q_index] + dot(prob_q.x[max_q_index], prob_q.x[max_q_index]);
-            double nenner_e = dot_yi_yi - 2* dot_yi_y[max_q_index] +  dot(prob_q.x[max_q_index], prob_q.x[max_q_index]);
+            double zaehler = dot_xi_yi - dot_xi_y[max_q_index] - dot_yi_y[max_q_index] + dot(prob_q.x[max_q_index], prob_q.x[max_q_index]);
+            double nenner = dot_yi_yi - 2* dot_yi_y[max_q_index] +  dot(prob_q.x[max_q_index], prob_q.x[max_q_index]);
 
             lambda = zaehler / nenner;
 
@@ -415,35 +396,29 @@ int main (int argc, const char ** argv)
             }
 
             // find max
-            int max_p_index_e = -1;
-            double max_p_e = -HUGE_VAL;
+            int max_p_index = -1;
+            double max_p = -HUGE_VAL;
             for (i=0;i<prob_p.l;i++) {
                 double sum = dot_yi_x[i] - dot_xi_x[i] - dot_xi_yi + dot_xi_xi;
-                if(sum > max_p_e)
+                if(sum > max_p)
                 {
-                    max_p_e = sum;
-                    max_p_index_e = i;
+                    max_p = sum;
+                    max_p_index = i;
                 }
             }
 
-            int max_q_index_e = -1;
-            double max_q_e = -HUGE_VAL;
+            int max_q_index = -1;
+            double max_q = -HUGE_VAL;
             for (i=0;i<prob_q.l;i++) {
                 double sum = dot_xi_y[i] - dot_yi_y[i] - dot_xi_yi + dot_yi_yi;
-                if(sum > max_q_e)
+                if(sum > max_q)
                 {
-                    max_q_e = sum;
-                    max_q_index_e = i;
+                    max_q = sum;
+                    max_q_index = i;
                 }
             }
 
-
-
-
-
             add_to_weights(y_weights, lambda, max_q_index, prob_q);
-            max_q_index = find_max_dotproduct_weights( y_weights, x_weights, prob_q, prob_p, &max_q); // max_p updaten
-            max_p_index = find_max_dotproduct_weights( x_weights, y_weights, prob_p, prob_q, &max_p); // max_p updaten
        }
 
         //duality gap
