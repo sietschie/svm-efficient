@@ -61,48 +61,6 @@ double dot(const struct svm_node *px, const struct svm_node *py)
 	return sum;
 }
 
-int find_max_dotproduct_weights(double* weights_x,
-                                double* weights_y,
-                                struct svm_problem prob_x,
-                                struct svm_problem prob_y,
-                                double *max_ret)
-{
-    int i;
-    double max = -HUGE_VAL; //compute_dot_product_with_differences(prob.x[0], x, y);
-    int max_index = -1;
-    for (i=0;i<prob_x.l;i++) // wtf?
-    {
-        double sum = 0.0;
-        int j;
-        for(j=0;j<prob_y.l;j++)
-        {
-            sum += weights_y[j] * dot(prob_x.x[i], prob_y.x[j]);
-        }
-        for(j=0;j<prob_x.l;j++)
-        {
-            sum -= weights_x[j] * dot(prob_x.x[i], prob_x.x[j]);
-        }
-        for(j=0;j<prob_x.l;j++)
-        {
-            int k;
-            for(k=0;k<prob_y.l;k++)
-            {
-                sum -= weights_x[j] * weights_y[k] * dot(prob_x.x[j], prob_y.x[k]);
-            }
-            for(k=0;k<prob_x.l;k++)
-            {
-                sum += weights_x[j] * weights_x[k] * dot(prob_x.x[j], prob_x.x[k]);
-            }
-        }
-        if( max < sum) {
-            max = sum;
-            max_index = i;
-        }
-    }
-    (*max_ret) = max; //todo: watch closely
-    return max_index;
-}
-
 void add_to_weights(double* weights, double lambda, int index, struct svm_problem prob)
 {
     int i;
@@ -123,51 +81,6 @@ void print_weights(double* weights, struct svm_problem prob)
 			printf("%d:\t%f  ",i,weights[i]);
 	}
 	printf("\n");
-}
-
-double compute_zaehler(double* x_weights, double* y_weights, const struct svm_node* x,  struct svm_problem prob_y, struct svm_problem prob_x)
-{
-    double sum = 0.0;
-    int j, k;
-    for(j=0;j<prob_x.l;j++){
-        for(k=0;k<prob_y.l;k++)
-        {
-            sum += x_weights[j] * y_weights[k] * dot(prob_x.x[j], prob_y.x[k]);
-        }
-    }
-
-    for(j=0;j<prob_x.l;j++)
-    {
-        sum -= x_weights[j] * dot(prob_x.x[j], x);
-    }
-
-    for(k=0;k<prob_y.l;k++) {
-        sum -= y_weights[k] * dot(prob_y.x[k], x);
-    }
-
-    sum += dot(x,x);
-    return sum;
-}
-
-
-double compute_nenner(double* y_weights, const struct svm_node* x,  struct svm_problem prob_y)
-{
-    double sum = 0.0;
-    int j, k;
-    for(j=0;j<prob_y.l;j++){
-        for(k=0;k<prob_y.l;k++)
-        {
-            sum += y_weights[j] * y_weights[k] * dot(prob_y.x[j], prob_y.x[k]);
-        }
-    }
-
-    for(j=0;j<prob_y.l;j++)
-    {
-        sum -= 2 * y_weights[j] * dot(prob_y.x[j], x);
-    }
-
-    sum += dot(x,x);
-    return sum;
 }
 
 double compute_distance(double* y_weights, double* x_weights, struct svm_problem prob_y, struct svm_problem prob_x)
