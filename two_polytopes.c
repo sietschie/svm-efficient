@@ -83,6 +83,22 @@ void print_weights(double* weights, struct svm_problem prob)
 	printf("\n");
 }
 
+int find_max(struct svm_problem prob_p, double *dot_yi_x, double* dot_xi_x, double dot_xi_yi, double dot_xi_xi, double *max_p) {
+    // find max
+    int max_p_index = -1;
+    *max_p = -HUGE_VAL;
+    int i;
+    for (i=0;i<prob_p.l;i++) {
+        double sum = dot_yi_x[i] - dot_xi_x[i] - dot_xi_yi + dot_xi_xi;
+        if(sum > *max_p)
+        {
+            *max_p = sum;
+            max_p_index = i;
+        }
+    }
+    return max_p_index;
+}
+
 int main (int argc, const char ** argv)
 {
     const char* filename;
@@ -170,28 +186,13 @@ int main (int argc, const char ** argv)
 
 
     // find max
-    int max_p_index = -1;
-    double max_p = -HUGE_VAL;
-    for (i=0;i<prob_p.l;i++) {
-        double sum = dot_yi_x[i] - dot_xi_x[i] - dot_xi_yi + dot_xi_xi;
+    int max_p_index;
+    double max_p;
+    max_p_index = find_max(prob_p, dot_yi_x, dot_xi_x, dot_xi_yi, dot_xi_xi, &max_p);
 
-        if(sum > max_p)
-        {
-            max_p = sum;
-            max_p_index = i;
-        }
-    }
-
-    int max_q_index = -1;
-    double max_q = -HUGE_VAL;
-    for (i=0;i<prob_q.l;i++) {
-        double sum = dot_xi_y[i] - dot_yi_y[i] - dot_xi_yi + dot_yi_yi;
-        if(sum > max_q)
-        {
-            max_q = sum;
-            max_q_index = i;
-        }
-    }
+    int max_q_index;
+    double max_q;
+    max_q_index = find_max(prob_q, dot_xi_y, dot_yi_y, dot_xi_yi, dot_yi_yi, &max_q);
 
     int j;
 
@@ -228,27 +229,8 @@ int main (int argc, const char ** argv)
             }
 
             // find max
-            max_p_index = -1;
-            max_p = -HUGE_VAL;
-            for (i=0;i<prob_p.l;i++) {
-                double sum = dot_yi_x[i] - dot_xi_x[i] - dot_xi_yi + dot_xi_xi;
-                if(sum > max_p)
-                {
-                    max_p = sum;
-                    max_p_index = i;
-                }
-            }
-
-            max_q_index = -1;
-            max_q = -HUGE_VAL;
-            for (i=0;i<prob_q.l;i++) {
-                double sum = dot_xi_y[i] - dot_yi_y[i] - dot_xi_yi + dot_yi_yi;
-                if(sum > max_q)
-                {
-                    max_q = sum;
-                    max_q_index = i;
-                }
-            }
+            max_p_index = find_max(prob_p, dot_yi_x, dot_xi_x, dot_xi_yi, dot_xi_xi, &max_p);
+            max_q_index = find_max(prob_q, dot_xi_y, dot_yi_y, dot_xi_yi, dot_yi_yi, &max_q);
 
         }
         else
@@ -282,27 +264,8 @@ int main (int argc, const char ** argv)
             }
 
             // find max
-            max_p_index = -1;
-            max_p = -HUGE_VAL;
-            for (i=0;i<prob_p.l;i++) {
-                double sum = dot_yi_x[i] - dot_xi_x[i] - dot_xi_yi + dot_xi_xi;
-                if(sum > max_p)
-                {
-                    max_p = sum;
-                    max_p_index = i;
-                }
-            }
-
-            max_q_index = -1;
-            max_q = -HUGE_VAL;
-            for (i=0;i<prob_q.l;i++) {
-                double sum = dot_xi_y[i] - dot_yi_y[i] - dot_xi_yi + dot_yi_yi;
-                if(sum > max_q)
-                {
-                    max_q = sum;
-                    max_q_index = i;
-                }
-            }
+            max_q_index = find_max(prob_q, dot_xi_y, dot_yi_y, dot_xi_yi, dot_yi_yi, &max_q);
+            max_p_index = find_max(prob_p, dot_yi_x, dot_xi_x, dot_xi_yi, dot_xi_xi, &max_p);
 
        }
 
