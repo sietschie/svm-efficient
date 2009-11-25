@@ -109,6 +109,26 @@ double compute_nenner(double dot_xi_xi, double* dot_xi_x, struct svm_problem pro
     return nenner;
 }
 
+double update_xi_xi(double dot_xi_xi, double* dot_xi_x, struct svm_problem prob_p, int max_p_index, double lambda) {
+    dot_xi_xi = lambda * lambda * dot_xi_xi
+            + 2 * lambda * (1.0 - lambda) * dot_xi_x[max_p_index]
+            + (1.0 - lambda)*(1.0 - lambda)*dot(prob_p.x[max_p_index],prob_p.x[max_p_index] );
+    return dot_xi_xi;
+}
+
+double update_xi_yi(double dot_xi_yi, double* dot_yi_x, int max_p_index, double lambda) {
+    dot_xi_yi = lambda * dot_xi_yi + (1.0 - lambda) * dot_yi_x[max_p_index];
+    return dot_xi_yi;
+}
+
+void update_xi_x(double* dot_xi_x, struct svm_problem prob_p, struct svm_problem prob_p2, int max_p_index, double lambda) {
+    int i;
+    for (i=0;i<prob_p2.l;i++) {
+        dot_xi_x[i]= dot_xi_x[i] * lambda + (1.0 - lambda) * dot(prob_p.x[max_p_index], prob_p2.x[i]);
+    }
+}
+
+
 int main (int argc, const char ** argv)
 {
     const char* filename;
@@ -224,19 +244,13 @@ int main (int argc, const char ** argv)
 
             // update dotproducts
 
-            dot_xi_xi = lambda * lambda * dot_xi_xi
-                        + 2 * lambda * (1.0 - lambda) * dot_xi_x[max_p_index]
-                        + (1.0 - lambda)*(1.0 - lambda)*dot(prob_p.x[max_p_index],prob_p.x[max_p_index] );
+            dot_xi_xi = update_xi_xi(dot_xi_xi, dot_xi_x, prob_p, max_p_index, lambda);
 
-            dot_xi_yi = lambda * dot_xi_yi + (1.0 - lambda) * dot_yi_x[max_p_index];
+            dot_xi_yi = update_xi_yi(dot_xi_yi, dot_yi_x, max_p_index, lambda);
 
-            for (i=0;i<prob_p.l;i++) {
-                dot_xi_x[i]= dot_xi_x[i] * lambda + (1.0 - lambda) * dot(prob_p.x[max_p_index], prob_p.x[i]);
-            }
+            update_xi_x(dot_xi_x, prob_p, prob_p, max_p_index, lambda);
 
-            for (i=0;i<prob_q.l;i++) {
-                dot_xi_y[i]= dot_xi_y[i] * lambda + (1.0 - lambda) * dot(prob_p.x[max_p_index], prob_q.x[i]);
-            }
+            update_xi_x(dot_xi_y, prob_p, prob_q, max_p_index, lambda);
 
             // find max
             max_p_index = find_max(prob_p, dot_yi_x, dot_xi_x, dot_xi_yi, dot_xi_xi, &max_p);
@@ -258,19 +272,13 @@ int main (int argc, const char ** argv)
 
             // update dotproducts
 
-            dot_yi_yi = lambda * lambda * dot_yi_yi
-                        + 2 * lambda * (1.0 - lambda) * dot_yi_y[max_q_index]
-                        + (1.0 - lambda)*(1.0 - lambda)*dot(prob_q.x[max_q_index],prob_q.x[max_q_index] );
+            dot_yi_yi = update_xi_xi(dot_yi_yi, dot_yi_y, prob_q, max_q_index, lambda);
 
-            dot_xi_yi = lambda * dot_xi_yi + (1.0 - lambda) * dot_xi_y[max_q_index];
+            dot_xi_yi = update_xi_yi(dot_xi_yi, dot_xi_y, max_q_index, lambda);
 
-            for (i=0;i<prob_q.l;i++) {
-                dot_yi_y[i]= dot_yi_y[i] * lambda + (1.0 - lambda) * dot(prob_q.x[max_q_index], prob_q.x[i]);
-            }
+            update_xi_x(dot_yi_y, prob_q, prob_q, max_q_index, lambda);
 
-            for (i=0;i<prob_p.l;i++) {
-                dot_yi_x[i]= dot_yi_x[i] * lambda + (1.0 - lambda) * dot(prob_q.x[max_q_index], prob_p.x[i]);
-            }
+            update_xi_x(dot_yi_x, prob_q, prob_p, max_q_index, lambda);
 
             // find max
             max_q_index = find_max(prob_q, dot_xi_y, dot_yi_y, dot_xi_yi, dot_yi_yi, &max_q);
