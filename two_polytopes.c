@@ -276,7 +276,6 @@ int main (int argc, const char ** argv)
             add_to_weights(x_weights, lambda, max_p_index, prob_p);
 
             max_p_index = find_max_dotproduct_weights( x_weights, y_weights, prob_p, prob_q, &max_p); // max_p updaten
-            max_q_index = find_max_dotproduct_weights( y_weights, x_weights, prob_q, prob_p, &max_q); // max_p updaten
 
         }
         else
@@ -292,10 +291,10 @@ int main (int argc, const char ** argv)
             if(lambda > 1.0)	lambda = 0.0;
 
             add_to_weights(y_weights, lambda, max_q_index, prob_q);
+        }
 
-            max_q_index = find_max_dotproduct_weights( y_weights, x_weights, prob_q, prob_p, &max_q); // max_p updaten
-            max_p_index = find_max_dotproduct_weights( x_weights, y_weights, prob_p, prob_q, &max_p); // max_p updaten
-       }
+        max_q_index = find_max_dotproduct_weights( y_weights, x_weights, prob_q, prob_p, &max_q); // max_q updaten
+        max_p_index = find_max_dotproduct_weights( x_weights, y_weights, prob_p, prob_q, &max_p); // max_p updaten
 
         //duality gap
         // absolute duality gap
