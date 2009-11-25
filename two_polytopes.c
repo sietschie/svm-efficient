@@ -346,10 +346,11 @@ int main (int argc, const char ** argv)
         // adg / ||p-q||^2 - adg
         // adg / <p-q, p-q> - adg
 
-		printf("<x-y,x-y> = %f " , compute_distance(x_weights,y_weights,prob_p,prob_q));
+        double distance = dot_xi_xi + dot_yi_yi - 2 * dot_xi_yi;
 
+		printf("<x-y,x-y> = %f " , distance);
 
-        double rdg_nenner = compute_distance(x_weights,y_weights,prob_p,prob_q) - adg;
+        double rdg_nenner = distance - adg;
         double rdg;
 
         if (rdg_nenner <= 0)
