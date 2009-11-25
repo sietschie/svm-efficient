@@ -226,7 +226,7 @@ int main (int argc, const char ** argv)
 
     int j;
 
-    for (j=0;j<3;j++)
+    for (j=0;j<1000;j++)
     {
         double lambda;
         if (max_p >= max_q)
@@ -291,8 +291,8 @@ int main (int argc, const char ** argv)
 
         double adg = max_p + max_q;
 
-        printf("max_p = %f  max_q = %f ", max_p, max_q);
-        printf("adg = %f ", adg);
+        //printf("max_p = %f  max_q = %f ", max_p, max_q);
+        //printf("adg = %f ", adg);
 
         // relative duality gap
         // adg / ||p-q||^2 - adg
@@ -307,7 +307,7 @@ int main (int argc, const char ** argv)
 
         if (rdg_nenner <= 0)
         {
-            printf("set huge value... ");
+            //printf("set huge value... ");
             rdg = HUGE_VAL;
         }
         else
@@ -316,8 +316,8 @@ int main (int argc, const char ** argv)
         }
 
         printf("rdg = %f \n", rdg);
-		print_weights(x_weights, prob_p);
-		print_weights(y_weights, prob_q);
+		//print_weights(x_weights, prob_p);
+		//print_weights(y_weights, prob_q);
 
     }
 
