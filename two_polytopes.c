@@ -99,6 +99,16 @@ int find_max(struct svm_problem prob_p, double *dot_yi_x, double* dot_xi_x, doub
     return max_p_index;
 }
 
+double compute_zaehler(double dot_xi_yi, double* dot_yi_x, double* dot_xi_x, struct svm_problem prob_p, int max_p_index ) {
+    double zaehler = dot_xi_yi - dot_yi_x[max_p_index] - dot_xi_x[max_p_index] + dot(prob_p.x[max_p_index], prob_p.x[max_p_index]);
+    return zaehler;
+}
+
+double compute_nenner(double dot_xi_xi, double* dot_xi_x, struct svm_problem prob_p, int max_p_index) {
+    double nenner = dot_xi_xi - 2* dot_xi_x[max_p_index] +  dot(prob_p.x[max_p_index], prob_p.x[max_p_index]);
+    return nenner;
+}
+
 int main (int argc, const char ** argv)
 {
     const char* filename;
@@ -201,8 +211,8 @@ int main (int argc, const char ** argv)
         double lambda;
         if (max_p >= max_q)
         {
-            double zaehler = dot_xi_yi - dot_yi_x[max_p_index] - dot_xi_x[max_p_index] + dot(prob_p.x[max_p_index], prob_p.x[max_p_index]);
-            double nenner = dot_xi_xi - 2* dot_xi_x[max_p_index] +  dot(prob_p.x[max_p_index], prob_p.x[max_p_index]);
+            double zaehler = compute_zaehler(dot_xi_yi, dot_yi_x, dot_xi_x, prob_p, max_p_index);
+            double nenner = compute_nenner(dot_xi_xi, dot_xi_x, prob_p, max_p_index);
 
             lambda = zaehler / nenner;
 
@@ -235,9 +245,8 @@ int main (int argc, const char ** argv)
         }
         else
         {
-
-            double zaehler = dot_xi_yi - dot_xi_y[max_q_index] - dot_yi_y[max_q_index] + dot(prob_q.x[max_q_index], prob_q.x[max_q_index]);
-            double nenner = dot_yi_yi - 2* dot_yi_y[max_q_index] +  dot(prob_q.x[max_q_index], prob_q.x[max_q_index]);
+            double zaehler = compute_zaehler(dot_xi_yi, dot_xi_y, dot_yi_y, prob_q, max_q_index);
+            double nenner = compute_nenner(dot_yi_yi, dot_yi_y, prob_q, max_q_index);
 
             lambda = zaehler / nenner;
 
