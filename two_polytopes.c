@@ -83,34 +83,6 @@ void print_weights(double* weights, struct svm_problem prob)
 	printf("\n");
 }
 
-double compute_distance(double* y_weights, double* x_weights, struct svm_problem prob_y, struct svm_problem prob_x)
-{
-    double sum = 0.0;
-    int j, k;
-    for(j=0;j<prob_x.l;j++){
-        for(k=0;k<prob_y.l;k++)
-        {
-            sum -= 2 * x_weights[j] * y_weights[k] * dot(prob_x.x[j], prob_y.x[k]);
-        }
-    }
-
-    for(j=0;j<prob_x.l;j++){
-        for(k=0;k<prob_x.l;k++)
-        {
-            sum += x_weights[j] * x_weights[k] * dot(prob_x.x[j], prob_x.x[k]);
-        }
-    }
-
-    for(j=0;j<prob_y.l;j++){
-        for(k=0;k<prob_y.l;k++)
-        {
-            sum += y_weights[j] * y_weights[k] * dot(prob_y.x[j], prob_y.x[k]);
-        }
-    }
-
-    return sum;
-}
-
 int main (int argc, const char ** argv)
 {
     const char* filename;
