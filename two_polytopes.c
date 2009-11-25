@@ -297,10 +297,6 @@ int main (int argc, const char ** argv)
             add_to_weights(x_weights, lambda, max_p_index, prob_p);
 
 			//print_weights(x_weights,prob_p);
-
-
-            max_p_index = find_max_dotproduct( x, y, prob_p, &max_p); // max_p updaten
-            max_q_index = find_max_dotproduct( y, x, prob_q, &max_q); // max_q updaten
         }
         else
         {
@@ -325,10 +321,10 @@ int main (int argc, const char ** argv)
             printf("lambda = %e  zaehler = %e  nenner = %e \n", lambda, zaehler, nenner);
             add_proportional(y,prob_q.x[max_q_index], lambda);
             add_to_weights(y_weights, lambda, max_q_index, prob_q);
-
-            max_q_index = find_max_dotproduct( y, x, prob_q, &max_q); // max_q updaten
-            max_p_index = find_max_dotproduct( y, x, prob_p, &max_p); // max_p updaten
         }
+
+        max_q_index = find_max_dotproduct( y, x, prob_q, &max_q); // max_q updaten
+        max_p_index = find_max_dotproduct( y, x, prob_p, &max_p); // max_p updaten
 
         //duality gap
         // absolute duality gap
