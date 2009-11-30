@@ -136,23 +136,15 @@ int main (int argc, const char ** argv)
     printf("Dateien einlesen... \n");
     if (argc < 2)
         //filename = "data/heart_scale.plus";
-        filename = "data/triangle.left.txt";
+        filename = "data/triangle.txt";
     else
         filename = argv[1];
 
     read_problem(filename);
 
-    prob_p = prob;
+    prob_p = prob[0];
+    prob_q = prob[1];
 
-    if (argc < 3)
-        //filename = "data/heart_scale.minus";
-        filename = "data/triangle.right.txt";
-    else
-        filename = argv[2];
-
-    read_problem(filename);
-
-    prob_q = prob;
 
     printf("Anzahl der eingelesenen Datensaetze: P = %d   Q = %d \n", prob_p.l, prob_q.l);
 
@@ -226,7 +218,7 @@ int main (int argc, const char ** argv)
 
     int j;
 
-    for (j=0;j<1000;j++)
+    for (j=0;j<5;j++)
     {
         double lambda;
         if (max_p >= max_q)
@@ -294,7 +286,8 @@ int main (int argc, const char ** argv)
 
         double distance = dot_xi_xi + dot_yi_yi - 2 * dot_xi_yi;
 
-		printf("<x-y,x-y> = %f " , distance);
+		printf("<x-y,x-y> = %e " , distance);
+		printf("adg = %e " , adg);
 
         double rdg_nenner = distance - adg;
         double rdg;
@@ -309,7 +302,7 @@ int main (int argc, const char ** argv)
             rdg = adg / rdg_nenner;
         }
 
-        printf("rdg = %f \n", rdg);
+        printf("rdg = %e \n", rdg);
 		//print_weights(x_weights, prob_p);
 		//print_weights(y_weights, prob_q);
 

@@ -14,7 +14,7 @@ struct svm_problem
 	struct svm_node **x;
 };
 
-struct svm_problem prob;		// set by read_problem
+struct svm_problem prob[2];		// set by read_problem
 
 void read_problem(const char *filename);
 
