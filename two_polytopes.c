@@ -202,12 +202,6 @@ int main (int argc, const char ** argv)
     int max_index_q = compute_max_index(prob[1]); //Todo: besseren namen finden
     int max_index_p = compute_max_index(prob[0]);
 
-    printf("Groesse der Vektoren: P = %d, Q = %d \n", max_index_p, max_index_q);
-
-    int elements = max_index_p;
-    if (elements < max_index_q)	elements = max_index_q;
-    elements++; //add one for the stopping index -1
-
     printf("Gewichtsvektoren initialisieren.. \n");
     double* x_weights = (double *) malloc(prob[0].l * sizeof(double));
 
