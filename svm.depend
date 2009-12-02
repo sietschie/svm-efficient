@@ -15,7 +15,7 @@
 	<string.h>
 	"readsvm.h"
 
-1259068086 "
+1259619869 "
 
 1257178644 p:\documents and settings\goering\my documents\my dropbox\uni\sa-cuda\svm\readsvm.h
 
@@ -122,5 +122,20 @@
 	<stdlib.h>
 	<errno.h>
 	<string.h>
+	"readsvm.h"
+
+1259619869 source:/home/goering/Dropbox/uni/sa-cuda/svm-efficient/readsvm.c
+	<stdio.h>
+	<stdlib.h>
+	<errno.h>
+	<string.h>
+	"readsvm.h"
+
+1259617725 /home/goering/Dropbox/uni/sa-cuda/svm-efficient/readsvm.h
+
+1259785046 source:/home/goering/Dropbox/uni/sa-cuda/svm-efficient/two_polytopes.c
+	<stdio.h>
+	<stdlib.h>
+	<math.h>
 	"readsvm.h"
 

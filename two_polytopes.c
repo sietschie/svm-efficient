@@ -5,6 +5,18 @@
 #include "readsvm.h"
 //#define INFINITY	__builtin_inf() // todo: get rid of that
 
+inline double powi(double base, int times)
+{
+	double tmp = base, ret = 1.0;
+
+    int t;
+	for(t=times; t>0; t/=2)
+	{
+		if(t%2==1) ret*=tmp;
+		tmp = tmp * tmp;
+	}
+	return ret;
+}
 
 int compute_max_index(const struct svm_problem prob)
 {
@@ -58,10 +70,47 @@ double dot(const struct svm_node *px, const struct svm_node *py)
 	return sum;
 }
 
-double kernel(int set1, int e1ement1, int set2, int element2)
+// svm_parameter
+const int kernel_type;
+const int degree;
+const double gamm_a;
+const double coef0;
+
+//double kernel(int set1, int element1, int set2, int element2)
+//{
+//    return dot(prob[set1].x[element1], prob[set2].x[element2]);
+//}
+
+double kernel_linear(int set1, int element1, int set2, int element2)
+//double kernel(int set1, int element1, int set2, int element2)
 {
-    return dot(prob[set1].x[e1ement1], prob[set2].x[element2]);
+    return dot(prob[set1].x[element1], prob[set2].x[element2]);
 }
+
+double kernel_poly(int set1, int element1, int set2, int element2)
+{
+    return powi(gamm_a*dot(prob[set1].x[element1], prob[set2].x[element2])+coef0,degree);
+}
+
+double kernel_rbf(int set1, int element1, int set2, int element2)
+{
+//    return exp(-gamm_a*(x_square[i]+x_square[j]-2*dot(prob[set1].x[element1], prob[set2].x[element2])));
+    return exp(-gamm_a*( dot(prob[set1].x[element1], prob[set1].x[element1])+
+                        dot(prob[set1].x[element2], prob[set2].x[element2])-2*
+                        dot(prob[set1].x[element1], prob[set2].x[element2])));
+}
+
+double kernel_sigmoid(int set1, int element1, int set2, int element2)
+{
+    return tanh(gamm_a*dot(prob[set1].x[element1], prob[set2].x[element2])+coef0);
+}
+
+/*double kernel_precomputed(int set1, int element1, int set2, int element2)
+{
+    return x[i][(int)(x[j][0].value)].value;
+}*/
+
+double (*kernel)(int, int, int, int);
 
 
 void add_to_weights(double* weights, double lambda, int index, int set)
@@ -134,6 +183,9 @@ void update_xi_x(double* dot_xi_x, int p, int p2, int max_p_index, double lambda
 
 int main (int argc, const char ** argv)
 {
+
+    kernel = &kernel_linear;
+
     const char* filename;
 
     printf("Dateien einlesen... \n");
