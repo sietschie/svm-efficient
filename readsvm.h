@@ -16,6 +16,8 @@ struct svm_problem
 
 struct svm_problem prob[2];		// set by read_problem
 
+extern int max_index;
+
 void read_problem(const char *filename);
 
 #endif // READSVM_H_INCLUDED

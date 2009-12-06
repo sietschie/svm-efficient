@@ -14,7 +14,7 @@ static int max_line_len;
 struct svm_node *x_space[2];
 static double C = 5.5;
 
-
+int max_index = 0;
 
 void exit_input_error(int line_num)
 {
@@ -43,7 +43,7 @@ static char* readline(FILE *input)
 
 void read_problem(const char *filename)
 {
-	int elements[2], max_index, inst_max_index, i[2], j[2];
+	int elements[2], inst_max_index, i[2], j[2];
 	FILE *fp = fopen(filename,"r");
 	char *endptr;
 	char *idx, *val, *label;
@@ -93,7 +93,7 @@ void read_problem(const char *filename)
 	prob[1].x = Malloc(struct svm_node *,prob[1].l);
 	x_space[1] = 	Malloc(struct svm_node,elements[1]);
 
-	max_index = 0;
+//	max_index = 0;
 	j[0]=0;
 	j[1]=0;
 

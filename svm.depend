@@ -124,18 +124,19 @@
 	<string.h>
 	"readsvm.h"
 
-1259619869 source:/home/goering/Dropbox/uni/sa-cuda/svm-efficient/readsvm.c
+1259794895 source:/home/goering/Dropbox/uni/sa-cuda/svm-efficient/readsvm.c
 	<stdio.h>
 	<stdlib.h>
 	<errno.h>
 	<string.h>
 	"readsvm.h"
 
-1259617725 /home/goering/Dropbox/uni/sa-cuda/svm-efficient/readsvm.h
+1259794982 /home/goering/Dropbox/uni/sa-cuda/svm-efficient/readsvm.h
 
-1259785046 source:/home/goering/Dropbox/uni/sa-cuda/svm-efficient/two_polytopes.c
+1259794765 source:/home/goering/Dropbox/uni/sa-cuda/svm-efficient/two_polytopes.c
 	<stdio.h>
 	<stdlib.h>
+	<string.h>
 	<math.h>
 	"readsvm.h"
 
