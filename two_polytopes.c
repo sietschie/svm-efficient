@@ -6,29 +6,6 @@
 #include "readsvm.h"
 //#define INFINITY	__builtin_inf() // todo: get rid of that
 
-enum { C_SVC, NU_SVC, ONE_CLASS, EPSILON_SVR, NU_SVR };	/* svm_type */
-enum { LINEAR, POLY, RBF, SIGMOID }; //, PRECOMPUTED }; /* kernel_type */
-
-struct svm_parameter
-{
-	int svm_type;
-	int kernel_type;
-	int degree;	/* for poly */
-	double gamma;	/* for poly/rbf/sigmoid */
-	double coef0;	/* for poly/sigmoid */
-
-	/* these are for training only */
-	double cache_size; /* in MB */
-	double eps;	/* stopping criteria */
-	double C;	/* for C_SVC, EPSILON_SVR and NU_SVR */
-	int nr_weight;		/* for C_SVC */
-	int *weight_label;	/* for C_SVC */
-	double* weight;		/* for C_SVC */
-	double nu;	/* for NU_SVC, ONE_CLASS, and NU_SVR */
-	double p;	/* for EPSILON_SVR */
-	int shrinking;	/* use the shrinking heuristics */
-	int probability; /* do probability estimates */
-};
 
 
 struct svm_parameter param;		// set by parse_command_line
@@ -362,9 +339,6 @@ void update_xi_x(double* dot_xi_x, int p, int p2, int max_p_index, double lambda
 void compute_weights(double *x_weights, double* y_weights)
 {
     printf("Gewichtsvektoren initialisieren.. \n");
-    x_weights = (double *) malloc(prob[0].l * sizeof(double));
-
-    y_weights = (double *) malloc(prob[1].l * sizeof(double));
 
     // initialize weights
     int i;
@@ -423,7 +397,7 @@ void compute_weights(double *x_weights, double* y_weights)
 
     int j;
 
-    for (j=0;j<5000  ;j++)
+    for (j=0;j<10  ;j++)
     {
         double lambda;
         if (max_p >= max_q)
@@ -567,7 +541,38 @@ int main (int argc, char ** argv)
     int max_index_p = compute_max_index(prob[0]);
 
     double *x_weights, *y_weights;
+    x_weights = (double *) malloc(prob[0].l * sizeof(double));
+    y_weights = (double *) malloc(prob[1].l * sizeof(double));
+
     compute_weights(x_weights, y_weights);
+
+    struct svm_model model;
+    model.param = param;
+
+    model.weights[0] = x_weights;
+    model.weights[1] = y_weights;
+
+    model.SV[0] = prob[0].x;
+    model.SV[1] = prob[1].x;
+
+
+    model.l=0;
+    model.nSV[0]=0;
+    model.nSV[1]=0;
+
+    int i;
+    int j;
+    for(j=0;j<2;j++)
+    for(i=0;i<prob[j].l;i++)
+    {
+        if(model.weights[j][i] != 0.0)
+        {
+            model.l++;
+            model.nSV[j]++;
+        }
+    }
+
+    svm_save_model(model_filename, &model);
 
     return 0;
 }

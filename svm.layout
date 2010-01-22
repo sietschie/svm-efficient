@@ -1,13 +1,13 @@
 <?xml version="1.0" encoding="UTF-8" standalone="yes" ?>
 <CodeBlocks_layout_file>
 	<ActiveTarget name="Debug" />
-	<File name="readsvm.c" open="1" top="0" tabpos="2">
-		<Cursor position="3137" topLine="0" />
+	<File name="readsvm.c" open="1" top="1" tabpos="2">
+		<Cursor position="254" topLine="221" />
 	</File>
 	<File name="readsvm.h" open="1" top="0" tabpos="3">
-		<Cursor position="240" topLine="0" />
+		<Cursor position="203" topLine="0" />
 	</File>
-	<File name="two_polytopes.c" open="1" top="1" tabpos="1">
-		<Cursor position="14557" topLine="530" />
+	<File name="two_polytopes.c" open="1" top="0" tabpos="1">
+		<Cursor position="166" topLine="6" />
 	</File>
 </CodeBlocks_layout_file>

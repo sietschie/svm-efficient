@@ -79,18 +79,19 @@
 	<math.h>
 	"readsvm.h"
 
-1259619869 source:c:\documents and settings\goering\my documents\my dropbox\uni\sa-cuda\svm-efficient\readsvm.c
+1261054704 source:c:\documents and settings\goering\my documents\my dropbox\uni\sa-cuda\svm-efficient\readsvm.c
 	<stdio.h>
 	<stdlib.h>
 	<errno.h>
 	<string.h>
 	"readsvm.h"
 
-1259617725 c:\documents and settings\goering\my documents\my dropbox\uni\sa-cuda\svm-efficient\readsvm.h
+1261054448 c:\documents and settings\goering\my documents\my dropbox\uni\sa-cuda\svm-efficient\readsvm.h
 
-1259675365 source:c:\documents and settings\goering\my documents\my dropbox\uni\sa-cuda\svm-efficient\two_polytopes.c
+1261054354 source:c:\documents and settings\goering\my documents\my dropbox\uni\sa-cuda\svm-efficient\two_polytopes.c
 	<stdio.h>
 	<stdlib.h>
+	<string.h>
 	<math.h>
 	"readsvm.h"
 
@@ -109,20 +110,18 @@
 	<math.h>
 	"readsvm.h"
 
-1259619226 source:/home/goering/Dropbox/uni/sa-cuda/svm-efficient/two_polytopes.c
+1259794765 source:/home/goering/Dropbox/uni/sa-cuda/svm-efficient/two_polytopes.c
 	<stdio.h>
 	<stdlib.h>
 	<math.h>
 	"readsvm.h"
-
-1259617725 /home/goering/Dropbox/uni/sa-cuda/svm-efficient/readsvm.h
-
-1259619869 source:/home/goering/Dropbox/uni/sa-cuda/svm-efficient/readsvm.c
 	<stdio.h>
 	<stdlib.h>
-	<errno.h>
 	<string.h>
+	<math.h>
 	"readsvm.h"
+
+1259794982 /home/goering/Dropbox/uni/sa-cuda/svm-efficient/readsvm.h
 
 1259794895 source:/home/goering/Dropbox/uni/sa-cuda/svm-efficient/readsvm.c
 	<stdio.h>
@@ -130,13 +129,18 @@
 	<errno.h>
 	<string.h>
 	"readsvm.h"
+	<stdio.h>
+	<stdlib.h>
+	<errno.h>
+	<string.h>
+	"readsvm.h"
 
-1259794982 /home/goering/Dropbox/uni/sa-cuda/svm-efficient/readsvm.h
-
-1259794765 source:/home/goering/Dropbox/uni/sa-cuda/svm-efficient/two_polytopes.c
+1260977214 source:p:\documents and settings\goering\my documents\my dropbox\uni\sa-cuda\svm-efficient\two_polytopes.c
 	<stdio.h>
 	<stdlib.h>
 	<string.h>
 	<math.h>
 	"readsvm.h"
+
+1260977214 p:\documents and settings\goering\my documents\my dropbox\uni\sa-cuda\svm-efficient\readsvm.h
 
