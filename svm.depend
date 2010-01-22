@@ -88,7 +88,7 @@
 
 1261054448 c:\documents and settings\goering\my documents\my dropbox\uni\sa-cuda\svm-efficient\readsvm.h
 
-1261054354 source:c:\documents and settings\goering\my documents\my dropbox\uni\sa-cuda\svm-efficient\two_polytopes.c
+1264162977 source:c:\documents and settings\goering\my documents\my dropbox\uni\sa-cuda\svm-efficient\two_polytopes.c
 	<stdio.h>
 	<stdlib.h>
 	<string.h>
@@ -143,4 +143,9 @@
 	"readsvm.h"
 
 1260977214 p:\documents and settings\goering\my documents\my dropbox\uni\sa-cuda\svm-efficient\readsvm.h
+
+1264156616 source:c:\documents and settings\goering\my documents\my dropbox\uni\sa-cuda\svm-efficient\cache.c
+	"cache.h"
+
+1264156598 c:\documents and settings\goering\my documents\my dropbox\uni\sa-cuda\svm-efficient\cache.h
 
