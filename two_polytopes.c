@@ -9,6 +9,8 @@
 double* get_element(int id, int set);
 void init(int noce, int noe);
 
+double rho;
+
 
 struct svm_parameter param;		// set by parse_command_line
 
@@ -336,7 +338,7 @@ double update_xi_yi(double dot_xi_yi, double* dot_yi_x, int max_p_index, double 
 }
 
 void update_xi_x(double* dot_xi_x, int p, int p2, int max_p_index, double lambda) {
-    printf("update_xi_x(): %d %d %d \n", p, p2, max_p_index);
+    //printf("update_xi_x(): %d %d %d \n", p, p2, max_p_index);
     double* computed_kernels = get_element(max_p_index, p);
 
     int i;
@@ -344,9 +346,9 @@ void update_xi_x(double* dot_xi_x, int p, int p2, int max_p_index, double lambda
         //dot_xi_x[i]= dot_xi_x[i] * lambda + (1.0 - lambda) * kernel(p, max_p_index, p2, i);
         int offset = p2 * prob[0].l;
         dot_xi_x[i]= dot_xi_x[i] * lambda + (1.0 - lambda) * computed_kernels[ offset + i  ]; //(p, max_p_index, p2, i);
-        printf(" %f ", computed_kernels[ offset + i  ]);
+        //printf(" %f ", computed_kernels[ offset + i  ]);
     }
-    printf("\n");
+    //printf("\n");
 }
 
 void compute_weights(double *x_weights, double* y_weights)
@@ -410,7 +412,7 @@ void compute_weights(double *x_weights, double* y_weights)
 
     int j;
 
-    for (j=0;j<2  ;j++)
+    for (j=0;j<20 ;j++)
     {
         double lambda;
         if (max_p >= max_q)
@@ -498,6 +500,8 @@ void compute_weights(double *x_weights, double* y_weights)
 		//print_weights(x_weights, prob[0]);
 		//print_weights(y_weights, prob[1]);
 
+        rho = dot_xi_yi - dot_xi_xi - (dot_xi_xi + dot_yi_yi - 2 * dot_xi_yi)/2;
+
     }
 }
 
@@ -571,6 +575,8 @@ int main (int argc, char ** argv)
     model.SV[0] = prob[0].x;
     model.SV[1] = prob[1].x;
 
+    // <q, p-q> - <p-q, p-q>/2
+    model.rho = rho;
 
     model.l=0;
     model.nSV[0]=0;
@@ -656,13 +662,13 @@ void get_data(int id, int set, int pointer)
     int i;
     for(i=0;i<prob[0].l;i++)
     {
-        printf("set1 = %d, id = %d,  set2 = %d, id = %d res = %f\n", set, id, 0, i,  kernel(set, id, 0, i));
+        //printf("set1 = %d, id = %d,  set2 = %d, id = %d res = %f\n", set, id, 0, i,  kernel(set, id, 0, i));
         data[pointer][i] = kernel(set, id, 0, i);
     }
 
     for(i=0;i<prob[1].l;i++)
     {
-        printf("set1 = %d, id = %d,  set2 = %d, id = %d   res = %f \n", set, id, 1, i,  kernel(set, id, 1, i));
+        //printf("set1 = %d, id = %d,  set2 = %d, id = %d   res = %f \n", set, id, 1, i,  kernel(set, id, 1, i));
         data[pointer][i + prob[0].l] = kernel(set, id, 1, i);
     }
 }
@@ -710,7 +716,7 @@ void ca_bring_forward(int pos)
 
 double* get_element(int id, int set)
 {
-    printf(" get_element(): id = %d, set = %d \n", id, set);
+    //printf(" get_element(): id = %d, set = %d \n", id, set);
     int idset = id + set* prob[0].l;
     if( look_up_table[idset] == -1 ) { // cache miss
         ca_add(idset);

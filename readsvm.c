@@ -182,6 +182,12 @@ int svm_save_model(const char *model_file_name, const struct svm_model* model)
 //	int nr_class = model->nr_class;
 	int nr_class = 2;
 
+	{
+		fprintf(fp, "rho");
+        fprintf(fp," %g",model->rho);
+		fprintf(fp, "\n");
+	}
+
 	int i;
 	int counter[2];
 	counter[0] = 0;
