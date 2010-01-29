@@ -2,8 +2,9 @@
 #include <stdlib.h>
 #include <errno.h>
 #include <string.h>
-
+#include <ctype.h>
 #include "readsvm.h"
+#include "globals.h"
 
 #define Malloc(type,n) (type *)malloc((n)*sizeof(type))
 
@@ -12,7 +13,6 @@
 static char *line = NULL;
 static int max_line_len;
 struct svm_node *x_space[2];
-static double C = 5.5;
 
 int max_index = 0;
 
@@ -182,11 +182,6 @@ int svm_save_model(const char *model_file_name, const struct svm_model* model)
 //	int nr_class = model->nr_class;
 	int nr_class = 2;
 
-	{
-		fprintf(fp, "rho");
-        fprintf(fp," %g",model->rho);
-		fprintf(fp, "\n");
-	}
 
 	int i;
 	int counter[2];
@@ -209,9 +204,14 @@ int svm_save_model(const char *model_file_name, const struct svm_model* model)
 	fprintf(fp, "nr_class %d\n", nr_class);
 	fprintf(fp, "total_sv %d\n",l);
 
+//	{
+//		fprintf(fp, "rho");
+//        fprintf(fp," %g",model->rho);
+//		fprintf(fp, "\n");
+//	}
 	{
 		fprintf(fp, "rho");
-//        fprintf(fp," %g",model->rho);
+        fprintf(fp," %g",model->rho);
 		fprintf(fp, "\n");
 	}
 
@@ -430,7 +430,11 @@ struct svm_model *svm_load_model(const char *model_file_name)
 		} else
             cs = 0;
 
-		model->SV[ia[cs]] = &x_space[j];
+		*(model->SV[ia[cs]]) = &x_space[j]; //TODO: warum * davor schreiben, damit es keine warnung gibt?
+
+//		struct svm_node **SV[2]
+//		struct svm_node *x_space[2];
+
 
 		model->weights[cs][ia[cs]] = weight;
 //		int k;
