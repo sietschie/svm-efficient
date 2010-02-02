@@ -7,8 +7,6 @@
 #include "readsvm.h"
 //#define INFINITY	__builtin_inf() // todo: get rid of that
 
-double* get_element(int id, int set);
-void init(int noce, int noe);
 
 
 void exit_with_help()
@@ -245,6 +243,9 @@ int main (int argc, char ** argv)
 
     model.SV[0] = prob[0].x;
     model.SV[1] = prob[1].x;
+
+    model.label[0] = 1;
+    model.label[1] = -1; //todo: richtig machen. (namen aus daen file lesen?)
 
     // <q, p-q> - <p-q, p-q>/2
     model.rho = rho;

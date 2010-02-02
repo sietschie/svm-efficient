@@ -215,14 +215,23 @@ int svm_save_model(const char *model_file_name, const struct svm_model* model)
 		fprintf(fp, "\n");
 	}
 
-//	if(model->label)
-//	{
-//		fprintf(fp, "label");
-//		int i;
-//		for(i=0;i<nr_class;i++)
-//			fprintf(fp," %d",model->label[i]);
-//		fprintf(fp, "\n");
-//	}
+	if(model->label)
+	{
+		fprintf(fp, "label");
+		int i;
+		for(i=0;i<nr_class;i++)
+			fprintf(fp," %d",model->label[i]);
+		fprintf(fp, "\n");
+	}
+
+	if(model->nSV)
+	{
+		fprintf(fp, "nr_sv");
+		int i;
+		for(i=0;i<nr_class;i++)
+			fprintf(fp," %d",model->nSV[i]);
+		fprintf(fp, "\n");
+	}
 
 	fprintf(fp, "SV\n");
 //	const double * const *sv_coef = model->sv_coef;

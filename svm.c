@@ -26,6 +26,7 @@ int find_max(int p, double *dot_yi_x, double* dot_xi_x, double dot_xi_yi, double
     int i;
     for (i=0;i<prob[p].l;i++) {
         double sum = dot_yi_x[i] - dot_xi_x[i] - dot_xi_yi + dot_xi_xi;
+        //printf("sum:%f = dot_yi_x[%d]:%f - dot_xi_x[%d]:%f - dot_xi_yi:%f + dot_xi_xi:%f \n", sum, i, dot_yi_x[i], i,  dot_xi_x[i], dot_xi_yi, dot_xi_xi);
         if(sum > *max_p)
         {
             *max_p = sum;
@@ -66,7 +67,7 @@ void update_xi_x(double* dot_xi_x, int p, int p2, int max_p_index, double lambda
         //dot_xi_x[i]= dot_xi_x[i] * lambda + (1.0 - lambda) * kernel(p, max_p_index, p2, i);
         int offset = p2 * prob[0].l;
         dot_xi_x[i]= dot_xi_x[i] * lambda + (1.0 - lambda) * computed_kernels[ offset + i  ]; //(p, max_p_index, p2, i);
-        //printf(" %f ", computed_kernels[ offset + i  ]);
+        printf(" %d - %f, max_p_index = %d, offset = %d\n", i, computed_kernels[ offset + i  ], max_p_index, offset);
     }
     //printf("\n");
 }
@@ -132,7 +133,7 @@ void compute_weights(double *x_weights, double* y_weights)
 
     int j;
 
-    for (j=0;j<20 ;j++)
+    for (j=0;j<3 ;j++)
     {
         double lambda;
         if (max_p >= max_q)
@@ -154,9 +155,11 @@ void compute_weights(double *x_weights, double* y_weights)
 
             dot_xi_yi = update_xi_yi(dot_xi_yi, dot_yi_x, max_p_index, lambda);
 
+            printf("max_p: \n");
             update_xi_x(dot_xi_x, 0, 0, max_p_index, lambda);
 
             update_xi_x(dot_xi_y, 0, 1, max_p_index, lambda);
+        //printf("max_p = %f  max_q = %f zaehler = %f nenner = %f lambda = %f\n", max_p, max_q, zaehler, nenner, lambda);
         }
         else
         {
@@ -177,13 +180,15 @@ void compute_weights(double *x_weights, double* y_weights)
 
             dot_xi_yi = update_xi_yi(dot_xi_yi, dot_xi_y, max_q_index, lambda);
 
+            printf("max_q: \n");
             update_xi_x(dot_yi_y, 1, 1, max_q_index, lambda);
 
             update_xi_x(dot_yi_x, 1, 0, max_q_index, lambda);
+        //printf("max_p = %f  max_q = %f zaehler = %f nenner = %f lambda = %f\n", max_p, max_q, zaehler, nenner, lambda);
         }
         // find max
-        max_q_index = find_max(1, dot_xi_y, dot_yi_y, dot_xi_yi, dot_yi_yi, &max_q);
         max_p_index = find_max(0, dot_yi_x, dot_xi_x, dot_xi_yi, dot_xi_xi, &max_p);
+        max_q_index = find_max(1, dot_xi_y, dot_yi_y, dot_xi_yi, dot_yi_yi, &max_q);
 
 
         //duality gap
@@ -221,6 +226,7 @@ void compute_weights(double *x_weights, double* y_weights)
 		//print_weights(y_weights, prob[1]);
 
         rho = dot_xi_yi - dot_xi_xi - (dot_xi_xi + dot_yi_yi - 2 * dot_xi_yi)/2;
+        printf("xi_xi = %f   yi_yi = %f   xi_yi = %f \n", dot_xi_xi, dot_yi_yi, dot_xi_yi);
 
     }
 }

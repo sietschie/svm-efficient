@@ -79,8 +79,8 @@ void get_data(int id, int set, int pointer)
 
 
 void ca_add(int id) {
-    int last_id = reverse_look_up_table[ ca_last ]; // clean up look up table
-    if(last_id != -1)
+    int last_id = reverse_look_up_table[ circular_array[ca_last] ]; // clean up look up table
+    if(circular_array[ca_last] != -1)
     {
         //pos = look_up_table[ last_id ];
         look_up_table[ last_id ] = -1;
@@ -94,44 +94,42 @@ void ca_add(int id) {
     ca_last = ca_last - 1;
     if(ca_last<0) ca_last = nr_of_cache_entries - 1;
 
-    reverse_look_up_table[ca_first] = id;
-    look_up_table[id] = ca_first;
+    reverse_look_up_table[circular_array[ca_first]] = id;
+    look_up_table[id] = circular_array[ca_first];
 }
 
 void ca_bring_forward(int pos)
 {
-    int temp = circular_array[pos];
-    int pos_last = pos;
-    int pos_current = pos - 1;
-    if(pos_current < 0) pos_current = nr_of_cache_entries - 1;
-    while(pos_last != ca_first)
-    {
-        circular_array[pos_last] = circular_array[pos_current];
+    int pos_temp = -1;
+    int current = ca_first;
+    do{
+        int last = current;
+        current = current + 1;
+        if(current>=nr_of_cache_entries) current = 0;
+        pos_temp = circular_array[current];
+        circular_array[current] = circular_array[last];
 
-        pos_last = pos_current;
-        pos_current--;
-        if(pos_current < 0) pos_current = nr_of_cache_entries - 1;
-    }
+    } while( pos_temp != pos);
 
-    circular_array[ca_first] = temp;
-
-
+    circular_array[ca_first] = pos;
 }
 
 double* get_element(int id, int set)
 {
-    //printf(" get_element(): id = %d, set = %d \n", id, set);
+    printf(" get_element(): id = %d, set = %d \n", id, set);
     int idset = id + set* prob[0].l;
     if( look_up_table[idset] == -1 ) { // cache miss
         ca_add(idset);
         get_data(id, set, circular_array[ca_first]);
-//        printf("cache miss, id = %d, set = %d\n", id, set);
+        printf("cache miss, id = %d, set = %d\n", id, set);
     } else { //cache hit
-        if(look_up_table[idset] != ca_first)
+        printf("cache hit\n");
+        if(look_up_table[idset] != circular_array[ca_first])
         {
             ca_bring_forward(look_up_table[idset]);
         }
     }
+    printf("get_element = data[%d]  ca_first = %d \n", circular_array[ca_first], ca_first);
     return data[circular_array[ca_first]];
 }
 
