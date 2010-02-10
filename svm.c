@@ -67,13 +67,16 @@ void update_xi_x(double* dot_xi_x, int p, int p2, int max_p_index, double lambda
         //dot_xi_x[i]= dot_xi_x[i] * lambda + (1.0 - lambda) * kernel(p, max_p_index, p2, i);
         int offset = p2 * prob[0].l;
         dot_xi_x[i]= dot_xi_x[i] * lambda + (1.0 - lambda) * computed_kernels[ offset + i  ]; //(p, max_p_index, p2, i);
-        printf(" %d - %f, max_p_index = %d, offset = %d\n", i, computed_kernels[ offset + i  ], max_p_index, offset);
+        //printf(" %d - %f, max_p_index = %d, offset = %d\n", i, computed_kernels[ offset + i  ], max_p_index, offset);
     }
     //printf("\n");
 }
 
 void compute_weights(double *x_weights, double* y_weights)
 {
+        // init cache
+    init(10, prob[0].l + prob[1].l);
+
     printf("Gewichtsvektoren initialisieren.. \n");
 
     // initialize weights
@@ -133,8 +136,9 @@ void compute_weights(double *x_weights, double* y_weights)
 
     int j;
 
-    for (j=0;j<3 ;j++)
+    for (j=0;j<100 ;j++)
     {
+        //printf("j = %d \n", j);
         double lambda;
         if (max_p >= max_q)
         {
@@ -155,7 +159,7 @@ void compute_weights(double *x_weights, double* y_weights)
 
             dot_xi_yi = update_xi_yi(dot_xi_yi, dot_yi_x, max_p_index, lambda);
 
-            printf("max_p: \n");
+            //printf("max_p: \n");
             update_xi_x(dot_xi_x, 0, 0, max_p_index, lambda);
 
             update_xi_x(dot_xi_y, 0, 1, max_p_index, lambda);
@@ -180,7 +184,7 @@ void compute_weights(double *x_weights, double* y_weights)
 
             dot_xi_yi = update_xi_yi(dot_xi_yi, dot_xi_y, max_q_index, lambda);
 
-            printf("max_q: \n");
+            //printf("max_q: \n");
             update_xi_x(dot_yi_y, 1, 1, max_q_index, lambda);
 
             update_xi_x(dot_yi_x, 1, 0, max_q_index, lambda);
@@ -205,8 +209,6 @@ void compute_weights(double *x_weights, double* y_weights)
 
         double distance = dot_xi_xi + dot_yi_yi - 2 * dot_xi_yi;
 
-		printf("<x-y,x-y> = %e " , distance);
-		printf("adg = %e " , adg);
 
         double rdg_nenner = distance - adg;
         double rdg;
@@ -221,12 +223,15 @@ void compute_weights(double *x_weights, double* y_weights)
             rdg = adg / rdg_nenner;
         }
 
-        printf("rdg = %e \n", rdg);
+//		printf("<x-y,x-y> = %e " , distance);
+//		printf("adg = %e " , adg);
+ //       printf("rdg = %e \n", rdg);
 		//print_weights(x_weights, prob[0]);
 		//print_weights(y_weights, prob[1]);
 
+        //rho = - dot_xi_yi + dot_xi_xi - (dot_xi_xi + dot_yi_yi - 2 * dot_xi_yi)/2;
         rho = dot_xi_yi - dot_xi_xi - (dot_xi_xi + dot_yi_yi - 2 * dot_xi_yi)/2;
-        printf("xi_xi = %f   yi_yi = %f   xi_yi = %f \n", dot_xi_xi, dot_yi_yi, dot_xi_yi);
+        //printf("xi_xi = %f   yi_yi = %f   xi_yi = %f \n", dot_xi_xi, dot_yi_yi, dot_xi_yi);
 
     }
 }

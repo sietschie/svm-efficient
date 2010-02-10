@@ -6,7 +6,7 @@
 	<string.h>
 	<math.h>
 
-1265067331 
+1264722718 
 
 1257178704 source:p:\documents and settings\goering\my documents\my dropbox\uni\sa-cuda\svm\readsvm.c
 	<stdio.h>
@@ -15,7 +15,7 @@
 	<string.h>
 	"readsvm.h"
 
-1265068911 "
+1265125744 "
 
 1257178644 p:\documents and settings\goering\my documents\my dropbox\uni\sa-cuda\svm\readsvm.h
 
@@ -79,7 +79,7 @@
 	<math.h>
 	"readsvm.h"
 
-1264767870 source:c:\documents and settings\goering\my documents\my dropbox\uni\sa-cuda\svm-efficient\readsvm.c
+1265384422 source:c:\documents and settings\goering\my documents\my dropbox\uni\sa-cuda\svm-efficient\readsvm.c
 	<stdio.h>
 	<stdlib.h>
 	<errno.h>
@@ -88,10 +88,10 @@
 	"readsvm.h"
 	"globals.h"
 
-1264716775 c:\documents and settings\goering\my documents\my dropbox\uni\sa-cuda\svm-efficient\readsvm.h
+1264713174 c:\documents and settings\goering\my documents\my dropbox\uni\sa-cuda\svm-efficient\readsvm.h
 	"globals.h"
 
-1265067533 source:c:\documents and settings\goering\my documents\my dropbox\uni\sa-cuda\svm-efficient\two_polytopes.c
+1265369414 source:c:\documents and settings\goering\my documents\my dropbox\uni\sa-cuda\svm-efficient\two_polytopes.c
 	<stdio.h>
 	<stdlib.h>
 	<string.h>
@@ -114,7 +114,7 @@
 	<math.h>
 	"readsvm.h"
 
-1259794765 source:/home/goering/Dropbox/uni/sa-cuda/svm-efficient/two_polytopes.c
+1265125700 source:/home/goering/Dropbox/uni/sa-cuda/svm-efficient/two_polytopes.c
 	<stdio.h>
 	<stdlib.h>
 	<math.h>
@@ -124,10 +124,24 @@
 	<string.h>
 	<math.h>
 	"readsvm.h"
+	<stdio.h>
+	<stdlib.h>
+	<string.h>
+	"kernel.h"
+	"svm.h"
+	"readsvm.h"
+	<stdio.h>
+	<stdlib.h>
+	<string.h>
+	"kernel.h"
+	"svm.h"
+	"readsvm.h"
 
-1259794982 /home/goering/Dropbox/uni/sa-cuda/svm-efficient/readsvm.h
+1264716775 /home/goering/Dropbox/uni/sa-cuda/svm-efficient/readsvm.h
+	"globals.h"
+	"globals.h"
 
-1259794895 source:/home/goering/Dropbox/uni/sa-cuda/svm-efficient/readsvm.c
+1264767870 source:/home/goering/Dropbox/uni/sa-cuda/svm-efficient/readsvm.c
 	<stdio.h>
 	<stdlib.h>
 	<errno.h>
@@ -138,39 +152,53 @@
 	<errno.h>
 	<string.h>
 	"readsvm.h"
+	<stdio.h>
+	<stdlib.h>
+	<errno.h>
+	<string.h>
+	<ctype.h>
+	"readsvm.h"
+	"globals.h"
+	<stdio.h>
+	<stdlib.h>
+	<errno.h>
+	<string.h>
+	<ctype.h>
+	"readsvm.h"
+	"globals.h"
 
-1260977214 source:p:\documents and settings\goering\my documents\my dropbox\uni\sa-cuda\svm-efficient\two_polytopes.c
+1265125700 source:p:\documents and settings\goering\my documents\my dropbox\uni\sa-cuda\svm-efficient\two_polytopes.c
 	<stdio.h>
 	<stdlib.h>
 	<string.h>
-	<math.h>
+	"kernel.h"
+	"svm.h"
 	"readsvm.h"
 
-1260977214 p:\documents and settings\goering\my documents\my dropbox\uni\sa-cuda\svm-efficient\readsvm.h
+1264716776 p:\documents and settings\goering\my documents\my dropbox\uni\sa-cuda\svm-efficient\readsvm.h
+	"globals.h"
 
-1265068911 source:c:\documents and settings\goering\my documents\my dropbox\uni\sa-cuda\svm-efficient\cache.c
+1265384380 source:c:\documents and settings\goering\my documents\my dropbox\uni\sa-cuda\svm-efficient\cache.c
 	<stdlib.h>
 	<string.h>
 	"cache.h"
 	"kernel.h"
 	"globals.h"
 
-1264768381 c:\documents and settings\goering\my documents\my dropbox\uni\sa-cuda\svm-efficient\cache.h
+1264764780 c:\documents and settings\goering\my documents\my dropbox\uni\sa-cuda\svm-efficient\cache.h
 
 1264716436 source:c:\documents and settings\goering\my documents\my dropbox\uni\sa-cuda\svm-efficient\globals.c
 
-1264722718 source:c:\documents and settings\goering\my documents\my dropbox\uni\sa-cuda\svm-efficient\kernel.c
+1264719118 source:c:\documents and settings\goering\my documents\my dropbox\uni\sa-cuda\svm-efficient\kernel.c
 	<math.h>
 	"globals.h"
 	"kernel.h"
 
-1264722718 
+1264718640 c:\documents and settings\goering\my documents\my dropbox\uni\sa-cuda\svm-efficient\globals.h
 
-1264722241 c:\documents and settings\goering\my documents\my dropbox\uni\sa-cuda\svm-efficient\globals.h
+1264712740 c:\documents and settings\goering\my documents\my dropbox\uni\sa-cuda\svm-efficient\kernel.h
 
-1264716341 c:\documents and settings\goering\my documents\my dropbox\uni\sa-cuda\svm-efficient\kernel.h
-
-1265067331 source:c:\documents and settings\goering\my documents\my dropbox\uni\sa-cuda\svm-efficient\svm.c
+1265365934 source:c:\documents and settings\goering\my documents\my dropbox\uni\sa-cuda\svm-efficient\svm.c
 	<math.h>
 	<stdio.h>
 	<stdlib.h>
@@ -179,9 +207,14 @@
 	"kernel.h"
 	"cache.h"
 
-1264717031 c:\documents and settings\goering\my documents\my dropbox\uni\sa-cuda\svm-efficient\svm.h
+1264713430 c:\documents and settings\goering\my documents\my dropbox\uni\sa-cuda\svm-efficient\svm.h
 
-1265075804 source:/home/goering/Dropbox/uni/sa-cuda/svm-efficient/cache.c
+1265125744 source:/home/goering/Dropbox/uni/sa-cuda/svm-efficient/cache.c
+	<stdlib.h>
+	<string.h>
+	"cache.h"
+	"kernel.h"
+	"globals.h"
 	<stdlib.h>
 	<string.h>
 	"cache.h"
@@ -198,8 +231,22 @@
 	<math.h>
 	"globals.h"
 	"kernel.h"
+	<math.h>
+	"globals.h"
+	"kernel.h"
 
-1264767870 source:/home/goering/Dropbox/uni/sa-cuda/svm-efficient/readsvm.c
+1264717031 /home/goering/Dropbox/uni/sa-cuda/svm-efficient/svm.h
+
+1264722718 source:p:\documents and settings\goering\my documents\my dropbox\uni\sa-cuda\svm-efficient\kernel.c
+	<math.h>
+	"globals.h"
+	"kernel.h"
+
+1264722242 p:\documents and settings\goering\my documents\my dropbox\uni\sa-cuda\svm-efficient\globals.h
+
+1264716342 p:\documents and settings\goering\my documents\my dropbox\uni\sa-cuda\svm-efficient\kernel.h
+
+1265124116 source:p:\documents and settings\goering\my documents\my dropbox\uni\sa-cuda\svm-efficient\readsvm.c
 	<stdio.h>
 	<stdlib.h>
 	<errno.h>
@@ -208,16 +255,32 @@
 	"readsvm.h"
 	"globals.h"
 
-1264716775 /home/goering/Dropbox/uni/sa-cuda/svm-efficient/readsvm.h
-	"globals.h"
-
-1264768389 source:/home/goering/Dropbox/uni/sa-cuda/svm-efficient/two_polytopes.c
+1265125858 source:p:\documents and settings\goering\my documents\my dropbox\uni\sa-cuda\svm-efficient\svm.c
+	<math.h>
 	<stdio.h>
 	<stdlib.h>
-	<string.h>
-	"kernel.h"
 	"svm.h"
-	"readsvm.h"
+	"globals.h"
+	"kernel.h"
+	"cache.h"
 
-1264717031 /home/goering/Dropbox/uni/sa-cuda/svm-efficient/svm.h
+1264717032 p:\documents and settings\goering\my documents\my dropbox\uni\sa-cuda\svm-efficient\svm.h
+
+1265124116 p:\documents and settings\goering\my documents\my dropbox\uni\sa-cuda\svm-efficient\cache.h
+
+1265125744 source:p:\documents and settings\goering\my documents\my dropbox\uni\sa-cuda\svm-efficient\cache.c
+	<stdlib.h>
+	<string.h>
+	"cache.h"
+	"kernel.h"
+	"globals.h"
+
+1265135442 source:/home/goering/Dropbox/uni/sa-cuda/svm-efficient/svm.c
+	<math.h>
+	<stdio.h>
+	<stdlib.h>
+	"svm.h"
+	"globals.h"
+	"kernel.h"
+	"cache.h"
 

@@ -65,10 +65,10 @@ void read_problem(const char *filename)
 	line = Malloc(char,max_line_len);
 	while(readline(fp)!=NULL)
 	{
-		if(line[0] == '+')
-			current_set = 0;
-		else
+		if(line[0] == '-')
 			current_set = 1;
+		else
+			current_set = 0;
 
 		char *p = strtok(line," \t"); // label
 
@@ -105,10 +105,10 @@ void read_problem(const char *filename)
 	{
 		inst_max_index = -1; // strtol gives 0 if wrong format, and precomputed kernel has <index> start from 0
 		readline(fp);
-		if(line[0] == '+')
-			current_set = 0;
-		else
+		if(line[0] == '-')
 			current_set = 1;
+		else
+			current_set = 0;
 
 
 		prob[current_set].x[i[current_set]] = &x_space[current_set][j[current_set]];
@@ -239,10 +239,12 @@ int svm_save_model(const char *model_file_name, const struct svm_model* model)
 
     int j;
     for(j=0;j<2;j++)
-	for(i=0;i<prob[0].l;i++)
+	for(i=0;i<prob[j].l;i++)
 	{
+        //printf("neuer vektor: \n");        
 	    if(model->weights[j][i] != 0.0)
 	    {
+            //printf(" mit gutem coeffizienten: i = %d, j = %d\n", i, j);
 	        double sign = 1.0;
 	        if(j==1)
                 sign = -1.0;
@@ -252,9 +254,13 @@ int svm_save_model(const char *model_file_name, const struct svm_model* model)
 
 			while(p->index != -1)
 			{
+				//printf("p->index = %d p->value = %f\n", p->index, p->value);
+				//printf("%d:%.8g ",p->index,p->value);
 				fprintf(fp,"%d:%.8g ",p->index,p->value);
 				p++;
+				//printf("p->index = %d p->value = %f\n", p->index, p->value);
 			}
+		//printf("\n");
             fprintf(fp, "\n");
 	    }
 	}

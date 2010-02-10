@@ -100,36 +100,66 @@ void ca_add(int id) {
 
 void ca_bring_forward(int pos)
 {
-    int pos_temp = -1;
+//    printf("bring_fordward. enter. pos = %d\n", pos);
     int current = ca_first;
+    int pos_temp = circular_array[current];
+    int pos_temp2 = -1;
+//    int i;
+//    printf("circular array: ");
+//    for(i=0; i< nr_of_cache_entries; i++)
+//        printf(" %d: %d - ", i, circular_array[i]);
+//    printf("\n");
+
+//    printf("lut: ");
+//    for(i=0; i< nr_of_elements; i++)
+//        printf(" %d: %d - ", i, look_up_table[i]);
+//    printf("\n");
+
+//    printf("first = %d   last = %d \n", ca_first, ca_last);
+
+
     do{
-        int last = current;
+//        printf("bring_fordward. cycle. \n");
+
+        pos_temp2 = pos_temp;
         current = current + 1;
         if(current>=nr_of_cache_entries) current = 0;
         pos_temp = circular_array[current];
-        circular_array[current] = circular_array[last];
+//        printf("current = %d   last = %d  pt = %d, pt2 = %d\n", current, last, pos_temp, pos_temp2);
+        circular_array[current] = pos_temp2;
+
+//    printf("circular array 2: ");
+//    for(i=0; i< nr_of_cache_entries; i++)
+//        printf(" %d: %d - ", i, circular_array[i]);
+//    printf("\n");
 
     } while( pos_temp != pos);
 
     circular_array[ca_first] = pos;
+
+//    printf("circular array 3: ");
+//    for(i=0; i< nr_of_cache_entries; i++)
+//        printf(" %d: %d - ", i, circular_array[i]);
+//    printf("\n");
+
 }
 
 double* get_element(int id, int set)
 {
-    printf(" get_element(): id = %d, set = %d \n", id, set);
+    //printf(" get_element(): id = %d, set = %d \n", id, set);
     int idset = id + set* prob[0].l;
     if( look_up_table[idset] == -1 ) { // cache miss
         ca_add(idset);
         get_data(id, set, circular_array[ca_first]);
-        printf("cache miss, id = %d, set = %d\n", id, set);
+        //printf("cache miss, id = %d, set = %d\n", id, set);
     } else { //cache hit
-        printf("cache hit\n");
+        //printf("cache hit\n");
         if(look_up_table[idset] != circular_array[ca_first])
         {
             ca_bring_forward(look_up_table[idset]);
         }
     }
-    printf("get_element = data[%d]  ca_first = %d \n", circular_array[ca_first], ca_first);
+    //printf("get_element = data[%d]  ca_first = %d \n", circular_array[ca_first], ca_first);
     return data[circular_array[ca_first]];
 }
 

@@ -1,437 +1,340 @@
 #include <stdio.h>
 #include <stdlib.h>
-#include <errno.h>
 #include <string.h>
-#include <math.h>
+#include "kernel.h"
+#include "svm.h"
 
-#define Malloc(type,n) (type *)malloc((n)*sizeof(type))
+#include "readsvm.h"
+//#define INFINITY	__builtin_inf() // todo: get rid of that
 
-#define INFINITY	__builtin_inf() // todo: get rid of that
-//#defince INFINITY	HUGE_VAL //aus libsvm
 
-struct svm_node
+
+void exit_with_help()
 {
-	int index;
-	double value;
-};
-
-struct svm_problem
-{
-	int l;
-	double *y;
-	struct svm_node **x;
-};
-
-struct svm_problem prob;		// set by read_problem
-
-struct svm_problem prob_a;
-struct svm_problem prob_b;
-
-static char *line = NULL;
-static int max_line_len;
-struct svm_node *x_space;
-static double C = 5.5;
-
-
-
-void exit_input_error(int line_num)
-{
-	fprintf(stderr,"Wrong input format at line %d\n", line_num);
-	
+	printf(
+	"Usage: svm-train [options] training_set_file [model_file]\n"
+	"options:\n"
+	"-s svm_type : set type of SVM (default 0)\n"
+	"	0 -- C-SVC\n"
+	"	1 -- nu-SVC\n"
+	"	2 -- one-class SVM\n"
+	"	3 -- epsilon-SVR\n"
+	"	4 -- nu-SVR\n"
+	"-t kernel_type : set type of kernel function (default 2)\n"
+	"	0 -- linear: u'*v\n"
+	"	1 -- polynomial: (gamma*u'*v + coef0)^degree\n"
+	"	2 -- radial basis function: exp(-gamma*|u-v|^2)\n"
+	"	3 -- sigmoid: tanh(gamma*u'*v + coef0)\n"
+	"	4 -- precomputed kernel (kernel values in training_set_file)\n"
+	"-d degree : set degree in kernel function (default 3)\n"
+	"-g gamma : set gamma in kernel function (default 1/k)\n"
+	"-r coef0 : set coef0 in kernel function (default 0)\n"
+	"-c cost : set the parameter C of C-SVC, epsilon-SVR, and nu-SVR (default 1)\n"
+	"-n nu : set the parameter nu of nu-SVC, one-class SVM, and nu-SVR (default 0.5)\n"
+	"-p epsilon : set the epsilon in loss function of epsilon-SVR (default 0.1)\n"
+	"-m cachesize : set cache memory size in MB (default 100)\n"
+	"-e epsilon : set tolerance of termination criterion (default 0.001)\n"
+	"-h shrinking : whether to use the shrinking heuristics, 0 or 1 (default 1)\n"
+	"-b probability_estimates : whether to train a SVC or SVR model for probability estimates, 0 or 1 (default 0)\n"
+	"-wi weight : set the parameter C of class i to weight*C, for C-SVC (default 1)\n"
+	"-v n: n-fold cross validation mode\n"
+	"-q : quiet mode (no outputs)\n"
+	);
 	exit(1);
 }
 
-static char* readline(FILE *input)
+void parse_command_line(int argc, char **argv, char *input_file_name, char *model_file_name)
 {
-	int len;
-	
-	if(fgets(line,max_line_len,input) == NULL)
-		return NULL;
-	
-	while(strrchr(line,'\n') == NULL)
-	{
-		max_line_len *= 2;
-		line = (char *) realloc(line,max_line_len);
-		len = (int) strlen(line);
-		if(fgets(line+len,max_line_len-len,input) == NULL)
-			brea	;
-	}
-	return line;
-}
+	int i;
 
-void read_problem(const char *filename)
-{
-	int elements, max_index, inst_max_index, i, j;
-	FILE *fp = fopen(filename,"r");
-	char *endptr;
-	char *idx, *val, *label;
-	
-	if(fp == NULL)
+	// default values
+	param.svm_type = C_SVC;
+	param.kernel_type = RBF;
+	param.degree = 3;
+	param.gamma = 0;	// 1/k
+	param.coef0 = 0;
+	param.nu = 0.5;
+	param.cache_size = 100;
+	param.C = 1;
+	param.eps = 1e-3;
+	param.p = 0.1;
+	param.shrinking = 1;
+	param.probability = 0;
+	param.nr_weight = 0;
+	param.weight_label = NULL;
+	param.weight = NULL;
+//	cross_validation = 0;
+
+	// parse options
+	for(i=1;i<argc;i++)
 	{
-		fprintf(stderr,"can't open input file %s\n",filename);
-		exit(1);
-	}
-	
-	prob.l = 0;
-	elements = 0;
-	
-	max_line_len = 1024;
-	line = Malloc(char,max_line_len);
-	while(readline(fp)!=NULL)
-	{
-		char *p = strtok(line," \t"); // label
-		
-		// features
-		while(1)
+		if(argv[i][0] != '-') break;
+		if(++i>=argc)
+			exit_with_help();
+		switch(argv[i-1][1])
 		{
-			p = strtok(NULL," \t");
-			if(p == NULL || *p == '\n') // check '\n' as ' ' may be after the last feature
+			case 's':
+				param.svm_type = atoi(argv[i]);
 				break;
-			++elements;
-		}
-		++elements;
-		++prob.l;
-	}
-	rewind(fp);
-	
-	prob.y = Malloc(double,prob.l);
-	prob.x = Malloc(struct svm_node *,prob.l);
-	x_space = Malloc(struct svm_node,elements);
-	
-	max_index = 0;
-	j=0;
-	for(i=0;i<prob.l;i++)
-	{
-		inst_max_index = -1; // strtol gives 0 if wrong format, and precomputed kernel has <index> start from 0
-		readline(fp);
-		prob.x[i] = &x_space[j];
-		label = strtok(line," \t");
-		prob.y[i] = strtod(label,&endptr);
-		if(endptr == label)
-			exit_input_error(i+1);
-		
-		while(1)
-		{
-			idx = strtok(NULL,":");
-			val = strtok(NULL," \t");
-			
-			if(val == NULL)
+			case 't':
+				param.kernel_type = atoi(argv[i]);
 				break;
-			
-			errno = 0;
-			x_space[j].index = (int) strtol(idx,&endptr,10);
-			if(endptr == idx || errno != 0 || *endptr != '\0' || x_space[j].index <= inst_max_index)
-				exit_input_error(i+1);
-			else
-				inst_max_index = x_space[j].index;
-			
-			errno = 0;
-			x_space[j].value = strtod(val,&endptr);
-			if(endptr == val || errno != 0 || (*endptr != '\0' && !isspace(*endptr)))
-				exit_input_error(i+1);
-			
-			++j;
-		}
-		
-		if(inst_max_index > max_index)
-			max_index = inst_max_index;
-		x_space[j++].index = -1;
-	}
-
-	//if(param.gamma == 0 && max_index > 0)
-	//	param.gamma = 1.0/max_index;
-	
-	/*if(param.kernel_type == PRECOMPUTED)
-		for(i=0;i<prob.l;i++)
-		{
-			if (prob.x[i][0].index != 0)
-			{
-				fprintf(stderr,"Wrong input format: first column must be 0:sample_serial_number\n");
-				exit(1);
-			}
-			if ((int)prob.x[i][0].value <= 0 || (int)prob.x[i][0].value > max_index)
-			{
-				fprintf(stderr,"Wrong input format: sample_serial_number out of range\n");
-				exit(1);
-			}
-		}*/
-	
-	fclose(fp);
-}
-
-double k(struct svm_node* px, struct svm_node* py)
-{
-	double sum = 0;
-	while(px->index != -1 && py->index != -1)
-	{
-		if(px->index == py->index)
-		{
-			sum += px->value * py->value;
-			++px;
-			++py;
-		}
-		else
-		{
-			if(px->index > py->index)
-				++py;
-			else
-				++px;
-		}			
-	}
-	return sum;
-}
-
-void generate_K(double *K)
-{
-	
-	int i, j;
-	for(i = 0; i < prob.l; i++)
-	for(j = 0; j < prob.l; j++)
-	{
-		K[i + prob.l * j] = prob.y[i] * prob.y[j] * k(prob.x[i], prob.x[j]) + prob.y[i] * prob.y[j];
-		if(i == j)
-			K[i + prob.l * j] += 1/C;
-		//printf(" K[%d + %d * %d] = %f \n", i, prob.l, j, K[i + prob.l * j]);
-	}
-}
-
-double f(double* K, double *alpha)
-{
-	double sum = 0;
-		
-	int i, j;
-	for(i = 0; i < prob.l; i++)
-	for(j = 0; j < prob.l; j++)
-	{
-		sum += - alpha[i] * alpha[j] * K[i + prob.l * j];
-		//printf("sum = %f, alpha[i] = %f, alpha[j] = %f, K[i + prob.l * j] = %f, i=%d, j=%d \n", sum, alpha[i], alpha[j], K[i + prob.l * j], i, j);
-	}
-	return sum;
-}
-
-double zeile_aus_matrix_mal_vektor(double *K, double *alpha, int index)
-{
-	double sum = 0;
-	int i;
-	for(i=0;i<prob.l;i++)
-	{
-		sum += K[i + prob.l * index] * alpha[i];
-	}
-}
-
-int argmax_nabla_f(double* K, double* alpha)
-{
-	int i = 0;
-	double max = -2 * zeile_aus_matrix_mal_vektor(K, alpha, 0);
-	int max_index = 0;
-	
-	for(i=1; i < prob.l; i++)
-	{
-		double current = -2 * zeile_aus_matrix_mal_vektor(K, alpha, i);
-		if(current > max)
-		{
-			max = current;
-			max_index = i;
+			case 'd':
+				param.degree = atoi(argv[i]);
+				break;
+			case 'g':
+				param.gamma = atof(argv[i]);
+				break;
+			case 'r':
+				param.coef0 = atof(argv[i]);
+				break;
+			case 'n':
+				param.nu = atof(argv[i]);
+				break;
+			case 'm':
+				param.cache_size = atof(argv[i]);
+				break;
+			case 'c':
+				param.C = atof(argv[i]);
+				break;
+			case 'e':
+				param.eps = atof(argv[i]);
+				break;
+			case 'p':
+				param.p = atof(argv[i]);
+				break;
+			case 'h':
+				param.shrinking = atoi(argv[i]);
+				break;
+			case 'b':
+				param.probability = atoi(argv[i]);
+				break;
+//			case 'q':
+//				svm_print_string = &print_null;
+//				i--;
+//				break;
+//			case 'v':
+//				cross_validation = 1;
+//				nr_fold = atoi(argv[i]);
+//				if(nr_fold < 2)
+//				{
+//					fprintf(stderr,"n-fold cross validation: n must >= 2\n");
+//					exit_with_help();
+//				}
+//				break;
+			case 'w':
+				++param.nr_weight;
+				param.weight_label = (int *)realloc(param.weight_label,sizeof(int)*param.nr_weight);
+				param.weight = (double *)realloc(param.weight,sizeof(double)*param.nr_weight);
+				param.weight_label[param.nr_weight-1] = atoi(&argv[i-1][2]);
+				param.weight[param.nr_weight-1] = atof(argv[i]);
+				break;
+			default:
+				fprintf(stderr,"Unknown option: -%c\n", argv[i-1][1]);
+				exit_with_help();
 		}
 	}
-	//printf(" max = %f  max_index = %d \n", max, max_index);
-	return max_index;
-}
 
-int argmax_f_ei(double *K)
-{
-	int i;
-	int min_index = 0;
-	double min_value = K[0];
-	for (i=1; i<prob.l; i++) {
-		if(K[i + prob.l * i] < min_value)
-		{
-			min_index = i;
-			min_value = K[i + prob.l * i];
-		}
-	}
-	
-	return min_index;
-}
+	// determine filenames
 
-void generate_einheitsvektor(int index, double *alpha)
-{
-	int i;
-	for(i=0;i<prob.l;i++)
-		if(i == index)
-			alpha[i]=1.0;
-		else
-			alpha[i]=0.0;
-}
+	if(i>=argc)
+		exit_with_help();
 
-void compute_new_alpha(double* alpha, double t, int is, double *new_alpha)
-{
-	//printf("new_alpha = ");
-	int i;
-	for(i=0;i<prob.l;i++)
-	{
-		if(i==is)
-			new_alpha[i] = alpha[i] + t * (1 - alpha[i]);
-		else
-			new_alpha[i] = alpha[i] - t * ( alpha[i] );
-		//printf(" %f ", new_alpha[i]);
-	}
-	//printf("\n");
-}
+	strcpy(input_file_name, argv[i]);
 
-
-
-double find_t(double *K, double *alpha, int is, double * new_alpha)
-{
-
-	
-	
-	double t = 0.0;
-
-	compute_new_alpha(alpha, t, is, new_alpha);	
-	double max_value = f(K, new_alpha);
-	double max_t = 0.0;
-
-	for (; t<=1.0; t+=0.0001) {
-		compute_new_alpha(alpha, t, is, new_alpha);	
-		double new_value = f(K, new_alpha);
-		//printf("t = %f, value = %f \n", t, new_value);
-		if (new_value > max_value) {
-			max_value = new_value;
-			max_t = t;
-		}
-	}
-		
-	printf(" empirical max_t = %f \n", max_t);
-	
-	return max_t;
-}
-
-double e(int i, int j)
-{	
-	if(i==j)
-		return 1.0;
-	else 
-		return 0.0;
-}
-
-double find_t2(double *K, double *alpha, int is)
-{
-	int i,j;
-	
-	double zaehler = 0.0;
-	double nenner = 0.0;
-	
-	for (i=0; i<prob.l; i++)
-	for (j=0; j<prob.l; j++) {
-
-		zaehler += ( -alpha[i]*e(is, j) + alpha[i]*alpha[j] - alpha[j]*e(is,i) + alpha[i]*alpha[j]) * K[i + prob.l * j];
-		nenner += 2 * ( e(is,i)* e(is,j) - alpha[j] * e(is,i) - alpha[i] * e(is,j) + alpha[i] * alpha[j]) * K[i + prob.l * j];
-	}
-	
-	double t = zaehler / nenner;
-
-	//printf("berechnetes t = %f \n" , t );
-	
-	return t;
-}
-
-double compute_absolute_duality_gap(double *K, double *alpha)
-{
-	int i = argmax_nabla_f(K, alpha);
-	double res =  -2*zeile_aus_matrix_mal_vektor(K, alpha, i) - 2 * f(K, alpha);
-	return res;
-}
-
-double compute_relative_duality_gap(double *K, double *alpha)
-{
-	double absolute_gap = compute_absolute_duality_gap( K, alpha);
-
-	double nenner = absolute_gap + f(K,alpha); 
-	double res;
-
-	if(nenner >= 0.0)
-		res = INFINITY; 
+	if(i<argc-1)
+		strcpy(model_file_name,argv[i+1]);
 	else
-		res = - absolute_gap / (absolute_gap + f(K,alpha));
-	
-	return res;
+	{
+		char *p = strrchr(argv[i],'/');
+		if(p==NULL)
+			p = argv[i];
+		else
+			++p;
+		sprintf(model_file_name,"%s.model",p);
+	}
 }
 
-int main (int argc, const char ** argv)
-{  
-    const char* filename;
-    
-    if(argc < 2)
-		filename = "data/heart_scale.plus";
-    else
-    	filename = argv[1];
+int compute_max_index(const struct svm_problem prob)
+{
+    int i;
+    int max_index = 1;
+    for (i=0;i<prob.l;i++)
+    {
+        struct svm_node* px = prob.x[i];
+        while (px->index != -1)
+        {
+            if (px->index > max_index)
+                max_index = px->index;
+            px++;
+        }
+    }
+    return max_index;
+}
 
-    read_problem(filename);
-    
-    prob_a = prob;
+double compute_wxi(int p, int index, double *x_weights, double *y_weights) // w \cdot x_i
+{
+    double res=0.0;
+    int i;
+    for(i=0;i<prob[0].l;i++)
+    {
+//        printf("xw = %f   kernel = %f sum = %f \n ", x_weights[i], kernel(0,i,p,index), kernel(0,i,p,index));
+        res += x_weights[i] * kernel(0,i,p,index);
 
-    if(argc < 3)
-		filename = "data/heart_scale.minus";
-    else
-    	filename = argv[2];
+    }
 
-    read_problem(filename);
+    //printf("res1 = %f \n", res);
 
-    prob_b = prob;
-    
-    printf("prob_a.l = %d   prob_b.l = %d \n", prob_a.l, prob_b.l);
+    for(i=0;i<prob[1].l;i++)
+    {
+//        printf("yw = %f   kernel = %f sum = %f \n ", y_weights[i], kernel(1,i,p,index), kernel(1,i,p,index));
+        res -= y_weights[i] * kernel(1,i,p,index);
+    }
 
-/* 	double *K = (double*) malloc(prob.l * prob.l * sizeof(double));
-	//double *alpha = malloc(prob.l * sizeof(double));
-   
-    generate_K(K);
-	
-	int start_index = argmax_f_ei(K);
-	
-	printf("start_index = %d \n", start_index);
+    //printf("res2 = %f \n", res);
+    return res;
+}
+int main (int argc, char ** argv)
+{
 
-	double* alpha = (double*) malloc(prob.l * sizeof(double));
-	double *new_alpha = (double*) malloc(prob.l * sizeof(double));
+    kernel = &kernel_linear;
 
-	generate_einheitsvektor(start_index, alpha);
-//    double test = f()
-	
-	double min_error= 5;
-	double rdg = INFINITY; //todo:besseren initialen wert finden
-	int counter = 0;
-	
-	//while (rdg < min_error) {
-	while (rdg > min_error) { // todo: ist kleiner als ein schreibfehler?
-	
-		int is = argmax_nabla_f(K, alpha);
-	
-		//printf(" is = %d\n", is);
+    char input_filename[1024];
+    char model_filename[1024];
 
-		double t = find_t2(K, alpha, is);
-		
-		compute_new_alpha(alpha, t, is, new_alpha);	
-		
-		//t = find_t(K, alpha, is, new_alpha);
-	
-		double *temp = alpha;
-		alpha = new_alpha;
-		new_alpha = temp;
-	
-		double adg = compute_absolute_duality_gap(K, alpha);
-		rdg = compute_relative_duality_gap(K,alpha);
-	
-		counter++;
-		
-		//printf("adg = %f, rdg = %f f(alpha) = %f is = %d count = %d\n", adg, rdg, f(K, alpha), is, counter);
-	
+    parse_command_line(argc, argv, input_filename, model_filename);
+
+    printf("gamma = %e  max_index = %d \n", param.gamma, max_index);
+//    if(param.gamma == 0 && max_index > 0)
+		param.gamma = 1.0/max_index;
+
+    param.gamma = 1.0 / 3.0;
+
+    printf("gamma = %e \n", param.gamma);
+
+	switch(param.kernel_type)
+	{
+		case LINEAR:
+			kernel = &kernel_linear;
+			break;
+		case POLY:
+			kernel = &kernel_poly;
+			break;
+		case RBF:
+			kernel = &kernel_rbf;
+			break;
+		case SIGMOID:
+			kernel = &kernel_sigmoid;
+			break;
+//		case PRECOMPUTED:
+//			kernel = &kernel_precomputed;
+//			break;
 	}
 
-	int i;
-	for(i = 0; i < prob.l; i++)
-	{
-		//printf(" alpha[%3d} = %f \n",i, alpha[i]);
-	}*/
 
+    printf("Dateien einlesen... \n");
+//    if (argc < 2)
+        //filename = "data/heart_scale.plus";
+//        filename = "data/triangle.txt";
+//    else
+//        filename = argv[1];
+
+    read_problem(input_filename);
+
+    printf("Anzahl der eingelesenen Datensaetze: P = %d   Q = %d \n", prob[0].l, prob[1].l);
+
+
+//    int max_index_q = compute_max_index(prob[1]); //Todo: besseren namen finden
+//    int max_index_p = compute_max_index(prob[0]);
+
+    double *x_weights, *y_weights;
+    x_weights = (double *) malloc(prob[0].l * sizeof(double));
+    y_weights = (double *) malloc(prob[1].l * sizeof(double));
+
+    compute_weights(x_weights, y_weights);
+
+    struct svm_model model;
+    model.param = param;
+
+    model.weights[0] = x_weights;
+    model.weights[1] = y_weights;
+
+    model.SV[0] = prob[0].x;
+    model.SV[1] = prob[1].x;
+
+    model.label[0] = 1;
+    model.label[1] = -1; //todo: richtig machen. (namen aus daen file lesen?)
+
+    // <q, p-q> - <p-q, p-q>/2
+    model.rho = rho;
+
+    printf("rho = %f \n", rho);
+
+    model.l=0;
+    model.nSV[0]=0;
+    model.nSV[1]=0;
+
+    int i;
+    int j;
+    for(j=0;j<2;j++)
+    for(i=0;i<prob[j].l;i++)
+    {
+        if(model.weights[j][i] != 0.0)
+        {
+            model.l++;
+            model.nSV[j]++;
+        }
+    }
+
+    svm_save_model(model_filename, &model);
+
+//    rho = 1.0;
+
+    // compute beta
+    int k;
+    double beta_average = 0.0;
+
+    for(i=0;i<prob[0].l;i++)
+    {
+        if(x_weights[i] != 0.0)
+        {
+            double beta = compute_wxi(0,i, x_weights, y_weights) - 1;
+            beta_average += beta / (model.nSV[0] + model.nSV[1]);
+            //printf(" beta = %f \n", beta);
+        }
+    }
+
+    for(i=0;i<prob[1].l;i++)
+    {
+        if(y_weights[i] != 0.0)
+        {
+            double beta = compute_wxi(1,i, x_weights, y_weights) + 1;
+            beta_average += beta / (model.nSV[0] + model.nSV[1] );
+            //printf(" beta = %f \n", beta);
+        }
+    }
+
+    printf("beta average = %f %d %d\n", beta_average, model.nSV[0], model.nSV[1]);
+
+    double beta = beta_average;
+
+    //classify
+
+    int counter = 0;
+    int count_correct = 0;
+
+    for(k=0;k<2;k++)
+    for(i=0;i<prob[k].l;i++)
+    {
+        counter++;
+        double res = compute_wxi(k,i,x_weights, y_weights) - beta;
+        //printf("res = %f \n", res);
+        if(k==0 && res > 0.0) count_correct++;
+        if(k==1 && res < 0.0) count_correct++;
+
+    }
+
+    printf("counter = %d, count_correct = %d \n", counter, count_correct);
     return 0;
 }
+
