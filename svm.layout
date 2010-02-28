@@ -19,7 +19,7 @@
 	<File name="readsvm.h" open="0" top="0" tabpos="3">
 		<Cursor position="203" topLine="0" />
 	</File>
-	<File name="svm.c" open="0" top="0" tabpos="4">
-		<Cursor position="2813" topLine="69" />
+	<File name="svm.c" open="1" top="1" tabpos="1">
+		<Cursor position="4472" topLine="126" />
 	</File>
 </CodeBlocks_layout_file>

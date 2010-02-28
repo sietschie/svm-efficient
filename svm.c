@@ -136,7 +136,7 @@ void compute_weights(double *x_weights, double* y_weights)
 
     int j;
 
-    for (j=0;j<100 ;j++)
+    for (j=0;j<1000 ;j++)
     {
         //printf("j = %d \n", j);
         double lambda;
