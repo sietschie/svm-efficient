@@ -45,6 +45,7 @@ inline double powi(double base, int times)
 double kernel_linear(int set1, int element1, int set2, int element2)
 //double kernel(int set1, int element1, int set2, int element2)
 {
+	//printf(" dot: %d %d - %d %d \n", set1, element1, set2, element2);
     double ret = dot(prob[set1].x[element1], prob[set2].x[element2]);
     if(set1 == set2 && element1 == element2)
         ret += param.C;

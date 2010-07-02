@@ -268,7 +268,7 @@ int main (int argc, char ** argv)
     // <q, p-q> - <p-q, p-q>/2
     model.rho = rho;
 
-    printf("rho = %f \n", rho);
+    //printf("rho = %f \n", rho);
 
     model.l=0;
     model.nSV[0]=0;
@@ -289,7 +289,7 @@ int main (int argc, char ** argv)
     svm_save_model(model_filename, &model);
 
 //    rho = 1.0;
-
+/*
     // compute beta
     int k;
     double beta_average = 0.0;
@@ -335,6 +335,7 @@ int main (int argc, char ** argv)
     }
 
     printf("counter = %d, count_correct = %d \n", counter, count_correct);
+	*/
     return 0;
 }
 

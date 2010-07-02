@@ -136,7 +136,7 @@ void compute_weights(double *x_weights, double* y_weights)
 
     int j;
 
-    for (j=0;j<1000 ;j++)
+    for (j=0;j<10 ;j++)
     {
         //printf("j = %d \n", j);
         double lambda;
@@ -194,6 +194,7 @@ void compute_weights(double *x_weights, double* y_weights)
         max_p_index = find_max(0, dot_yi_x, dot_xi_x, dot_xi_yi, dot_xi_xi, &max_p);
         max_q_index = find_max(1, dot_xi_y, dot_yi_y, dot_xi_yi, dot_yi_yi, &max_q);
 
+		printf("max[0] = %d (%f)   max[1] = %d (%f)  \n", max_p_index, max_p, max_q_index, max_q);
 
         //duality gap
         // absolute duality gap
@@ -223,15 +224,30 @@ void compute_weights(double *x_weights, double* y_weights)
             rdg = adg / rdg_nenner;
         }
 
-//		printf("<x-y,x-y> = %e " , distance);
-//		printf("adg = %e " , adg);
- //       printf("rdg = %e \n", rdg);
-		//print_weights(x_weights, prob[0]);
-		//print_weights(y_weights, prob[1]);
+		//printf("<x-y,x-y> = %e " , distance);
+		//printf("adg = %e " , adg);
+        //printf("rdg = %e \n", rdg);
 
-        //rho = - dot_xi_yi + dot_xi_xi - (dot_xi_xi + dot_yi_yi - 2 * dot_xi_yi)/2;
+	
+
+
+	    //rho = - dot_xi_yi + dot_xi_xi - (dot_xi_xi + dot_yi_yi - 2 * dot_xi_yi)/2;
         rho = dot_xi_yi - dot_xi_xi - (dot_xi_xi + dot_yi_yi - 2 * dot_xi_yi)/2;
         //printf("xi_xi = %f   yi_yi = %f   xi_yi = %f \n", dot_xi_xi, dot_yi_yi, dot_xi_yi);
 
     }
+		
+	printf("\n weights[ %d ]:", 0);
+	for(j=0; j<prob[0].l; j++)
+	{	
+		if(x_weights[j] != 0.0)
+			printf(" %d:%f \n", j, x_weights[j]);
+	}
+	
+	printf("\n weights[ %d ]:", 1);
+	for(j=0; j<prob[1].l; j++)
+	{	
+		if(y_weights[j] != 0.0)
+			printf(" %d:%f \n", j, y_weights[j]);
+	}
 }

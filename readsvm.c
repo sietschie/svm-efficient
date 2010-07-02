@@ -60,7 +60,7 @@ void read_problem(const char *filename)
 	elements[1] = 0;
 
 	int current_set;
-
+	
 	max_line_len = 1024;
 	line = Malloc(char,max_line_len);
 	while(readline(fp)!=NULL)
