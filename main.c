@@ -204,14 +204,6 @@ int main (int argc, char ** argv)
 
     parse_command_line(argc, argv, input_filename, model_filename);
 
-    printf("gamma = %e  max_index = %d \n", param.gamma, max_index);
-//    if(param.gamma == 0 && max_index > 0)
-		param.gamma = 1.0/max_index;
-
-    param.gamma = 1.0 / 3.0;
-
-    printf("gamma = %e \n", param.gamma);
-
 	switch(param.kernel_type)
 	{
 		case LINEAR:
@@ -243,6 +235,11 @@ int main (int argc, char ** argv)
 
     printf("Anzahl der eingelesenen Datensaetze: P = %d   Q = %d \n", prob[0].l, prob[1].l);
 
+    printf("gamma = %e  max_index = %d \n", param.gamma, max_index);
+    if(param.gamma == 0 && max_index > 0)
+		param.gamma = 1.0/max_index;
+
+    printf("gamma = %e \n", param.gamma);
 
 //    int max_index_q = compute_max_index(prob[1]); //Todo: besseren namen finden
 //    int max_index_p = compute_max_index(prob[0]);

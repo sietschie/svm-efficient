@@ -63,7 +63,7 @@ double kernel_poly(int set1, int element1, int set2, int element2)
 double kernel_rbf(int set1, int element1, int set2, int element2)
 {
     double dots = ( dot(prob[set1].x[element1], prob[set1].x[element1])+
-                        dot(prob[set1].x[element1], prob[set2].x[element2])-2*
+                        dot(prob[set2].x[element2], prob[set2].x[element2])-2*
                         dot(prob[set1].x[element1], prob[set2].x[element2]));
     double wgamma = -param.gamma*dots;
     double wexp = exp(wgamma);
