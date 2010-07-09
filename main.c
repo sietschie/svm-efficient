@@ -177,7 +177,6 @@ int main (int argc, char ** argv)
 	}
 
 
-    printf("Dateien einlesen... \n");
 //    if (argc < 2)
         //filename = "data/heart_scale.plus";
 //        filename = "data/triangle.txt";
@@ -186,16 +185,14 @@ int main (int argc, char ** argv)
 
     read_problem(input_filename);
 
-    printf("Anzahl der eingelesenen Datensaetze: P = %d   Q = %d \n", prob[0].l, prob[1].l);
-
-    printf("gamma = %e  max_index = %d \n", param.gamma, max_index);
     if(param.gamma == 0 && max_index > 0)
 		param.gamma = 1.0/max_index;
 
-    printf("gamma = %e \n", param.gamma);
-
-//    int max_index_q = compute_max_index(prob[1]); //Todo: besseren namen finden
-//    int max_index_p = compute_max_index(prob[0]);
+	if(param.verbosity >= 1)
+	{
+		printf("vector dimension: %d \n", max_index);
+		printf(" number of vectors in class 1 = %d and in class 2 = %d \n", prob[0].l, prob[1].l);
+	}
 
     double *x_weights, *y_weights;
     x_weights = (double *) malloc(prob[0].l * sizeof(double));
