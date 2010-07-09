@@ -75,7 +75,7 @@ void update_xi_x(double* dot_xi_x, int p, int p2, int max_p_index, double lambda
 void compute_weights(double *x_weights, double* y_weights)
 {
         // init cache
-    init(10, prob[0].l + prob[1].l);
+    init(param.cache_size, prob[0].l + prob[1].l);
 
     // initialize weights
     int i;
@@ -227,7 +227,7 @@ void compute_weights(double *x_weights, double* y_weights)
 
 		if( param.verbosity >= 1 )
 		{
-			printf("iter = %d ", i);
+			printf("iter = %d ", j);
 			printf("dist = %e " , distance);
 			printf("adg = %e " , adg);
 			printf("rdg = %e \n", rdg);
