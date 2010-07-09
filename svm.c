@@ -136,7 +136,7 @@ void compute_weights(double *x_weights, double* y_weights)
 
     int j;
 
-    for (j=0;j<10 ;j++)
+    for (j=0;j<param.maximum_iterations;j++)
     {
         //printf("j = %d \n", j);
         double lambda;
@@ -234,7 +234,8 @@ void compute_weights(double *x_weights, double* y_weights)
 	    //rho = - dot_xi_yi + dot_xi_xi - (dot_xi_xi + dot_yi_yi - 2 * dot_xi_yi)/2;
         rho = dot_xi_yi - dot_xi_xi - (dot_xi_xi + dot_yi_yi - 2 * dot_xi_yi)/2;
         //printf("xi_xi = %f   yi_yi = %f   xi_yi = %f \n", dot_xi_xi, dot_yi_yi, dot_xi_yi);
-
+		if( rdg < param.eps )
+			break;
     }
 		
 	printf("\n weights[ %d ]:", 0);

@@ -167,7 +167,7 @@ int svm_save_model(const char *model_file_name, const struct svm_model* model)
 
 	const struct svm_parameter param = model->param;
 
-	fprintf(fp,"svm_type %s\n", svm_type_table[param.svm_type]);
+	fprintf(fp,"svm_type c_svc\n");
 	fprintf(fp,"kernel_type %s\n", kernel_type_table[param.kernel_type]);
 
 	if(param.kernel_type == POLY)
@@ -294,18 +294,12 @@ struct svm_model *svm_load_model(const char *model_file_name)
 		{
 			fscanf(fp,"%80s",cmd);
 			int i;
-			for(i=0;svm_type_table[i];i++)
+			if(strcmp("c_svc",cmd)==0)
 			{
-				if(strcmp(svm_type_table[i],cmd)==0)
-				{
-					param.svm_type=i;
-					break;
-				}
-			}
-			if(svm_type_table[i] == NULL)
+				break;
+			} else
 			{
 				fprintf(stderr,"unknown svm type.\n");
-//				free(model->rho);
 				free(model->label);
 				free(model->nSV);
 				free(model);
