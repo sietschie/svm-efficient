@@ -48,7 +48,7 @@ double kernel_linear(int set1, int element1, int set2, int element2)
 	//printf(" dot: %d %d - %d %d \n", set1, element1, set2, element2);
     double ret = dot(prob[set1].x[element1], prob[set2].x[element2]);
     if(set1 == set2 && element1 == element2)
-        ret += param.C;
+        ret += 1/param.C;
     return ret;
 }
 
@@ -56,7 +56,7 @@ double kernel_poly(int set1, int element1, int set2, int element2)
 {
     double ret = powi(param.gamma*dot(prob[set1].x[element1], prob[set2].x[element2])+param.coef0,param.degree);
     if(set1 == set2 && element1 == element2)
-        ret += param.C;
+        ret += 1/param.C;
     return ret;
 }
 
@@ -69,7 +69,7 @@ double kernel_rbf(int set1, int element1, int set2, int element2)
     double wexp = exp(wgamma);
 
     if(set1 == set2 && element1 == element2)
-        wexp += param.C;
+        wexp += 1/param.C;
     return wexp;
 
 }
@@ -78,7 +78,7 @@ double kernel_sigmoid(int set1, int element1, int set2, int element2)
 {
     double ret = tanh(param.gamma*dot(prob[set1].x[element1], prob[set2].x[element2])+param.coef0);
     if(set1 == set2 && element1 == element2)
-        ret += param.C;
+        ret += 1/param.C;
     return ret;
 }
 
