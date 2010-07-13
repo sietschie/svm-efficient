@@ -7,6 +7,8 @@
 #include "kernel.h"
 #include "cache.h"
 
+double* dot_same[2];
+
 void add_to_weights(double* weights, double lambda, int index, int set)
 {
     int i;
@@ -37,19 +39,19 @@ int find_max(int p, double *dot_yi_x, double* dot_xi_x, double dot_xi_yi, double
 }
 
 double compute_zaehler(double dot_xi_yi, double* dot_yi_x, double* dot_xi_x, int p, int max_p_index ) {
-    double zaehler = dot_xi_yi - dot_yi_x[max_p_index] - dot_xi_x[max_p_index] + kernel(p,max_p_index, p, max_p_index); //todo: samevector
+    double zaehler = dot_xi_yi - dot_yi_x[max_p_index] - dot_xi_x[max_p_index] + dot_same[p][max_p_index];
     return zaehler;
 }
 
 double compute_nenner(double dot_xi_xi, double* dot_xi_x, int p, int max_p_index) {
-    double nenner = dot_xi_xi - 2* dot_xi_x[max_p_index] +  kernel(p, max_p_index, p, max_p_index);
+    double nenner = dot_xi_xi - 2* dot_xi_x[max_p_index] + dot_same[p][max_p_index];
     return nenner;
 }
 
 double update_xi_xi(double dot_xi_xi, double* dot_xi_x, int p, int max_p_index, double lambda) {
     dot_xi_xi = lambda * lambda * dot_xi_xi
             + 2 * lambda * (1.0 - lambda) * dot_xi_x[max_p_index]
-            + (1.0 - lambda)*(1.0 - lambda)*kernel(p, max_p_index, p ,max_p_index );
+            + (1.0 - lambda)*(1.0 - lambda) * dot_same[p][max_p_index];
     return dot_xi_xi;
 }
 
@@ -105,16 +107,21 @@ void compute_weights(double *x_weights, double* y_weights)
 
     dot_xi_y = (double *) malloc(prob[1].l * sizeof(double));
     dot_yi_y = (double *) malloc(prob[1].l * sizeof(double));
+	
+    dot_same[0] = (double *) malloc(prob[0].l * sizeof(double));
+    dot_same[1] = (double *) malloc(prob[1].l * sizeof(double));
 
     // initialisieren
     for (i=0;i<prob[0].l;i++) {
         dot_xi_x[i]=kernel(0, 0, 0, i);
         dot_yi_x[i]=kernel(1, 0, 0, i);
+        dot_same[0][i]=kernel(0,i,0,i);
     }
 
     for (i=0;i<prob[1].l;i++) {
         dot_xi_y[i]=kernel(0, 0, 1, i);
         dot_yi_y[i]=kernel(1, 0, 1, i);
+        dot_same[1][i]=kernel(1,i,1,i);
     }
 
     dot_xi_xi = kernel(0, 0, 0, 0);
