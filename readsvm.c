@@ -270,7 +270,7 @@ int svm_save_model(const char *model_file_name, const struct svm_model* model)
 }
 
 
-struct svm_model *svm_load_model(const char *model_file_name)
+/*struct svm_model *svm_load_model(const char *model_file_name)
 {
 	FILE *fp = fopen(model_file_name,"rb");
 	if(fp==NULL) return NULL;
@@ -475,4 +475,4 @@ struct svm_model *svm_load_model(const char *model_file_name)
 
 	model->free_sv = 1;	// XXX
 	return model;
-}
+}*/

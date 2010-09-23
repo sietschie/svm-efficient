@@ -4,6 +4,8 @@
 #include "kernel.h"
 #include "svm.h"
 
+#include <math.h>
+
 #include "readsvm.h"
 //#define INFINITY	__builtin_inf() // todo: get rid of that
 
@@ -146,6 +148,107 @@ double compute_wxi(int p, int index, double *x_weights, double *y_weights) // w 
     //printf("res2 = %f \n", res);
     return res;
 }
+
+double* compute_w(int dimension, double *x_weights, double *y_weights )
+{
+    printf("allocate memory for w: %d \n", dimension);
+    double* w = (double*) malloc( (dimension + 1) * sizeof(double));
+
+    int i;
+    for(i=0;i<dimension+1;i++)
+    {
+	w[i]=0.0;
+    }
+
+    for(i=0;i<prob[0].l;i++)
+    {
+	struct svm_node* px = prob[0].x[i];
+	while( px->index != -1 )
+	{
+	    w[px->index] += px->value * x_weights[i];
+	    ++px;
+	}
+    }
+
+    for(i=0;i<prob[1].l;i++)
+    {
+	struct svm_node* px = prob[1].x[i];
+	while( px->index != -1 )
+	{
+	    w[px->index] -= px->value * y_weights[i];
+	    ++px;
+	}
+    }
+
+    for(i=0;i<dimension+1;i++)
+    {
+	printf( "  %f  ",w[i]);
+    }
+    printf("\n");
+    return w;
+}
+
+double dot_w(double* w, const struct svm_node* px)
+{
+    //printf("enter dot_w.. \n");
+    double ret = 0.0;
+    while(px->index != -1)
+    {
+	//printf("enter while... %d %f %f\n", px->index, px->value, w[0]);
+	ret += w[px->index] * px->value;
+	++px;
+    }
+    switch(param.kernel_type)
+    {
+	case LINEAR:
+	   return ret;
+	case POLY:
+	   return powi(param.gamma*ret+param.coef0,param.degree);
+	case RBF:
+	   return exp(-param.gamma*ret);
+	case SIGMOID:
+	   return tanh(param.gamma*ret+param.coef0);;
+	}
+    return ret;
+}
+
+double findmax(int set, double* w, double *x_weights, double *y_weights)
+{
+    printf("findmax.. \n");
+    double max = compute_wxi(set, 0, x_weights, y_weights);
+    int i;
+    for(i=0;i<prob[set].l;i++)
+    {
+	double res = compute_wxi(set, i, x_weights, y_weights);//dot_w(w,prob[set].x[i]);
+	if( res > max )
+	{
+	    max = res;
+	}
+    //printf(" res = %f \n", res);
+    }
+    //printf(" max = %f \n", max);
+    return max;
+}
+
+double findmin(int set, double* w, double *x_weights, double *y_weights)
+{
+    printf("findmin.. \n");
+    double min = compute_wxi(set, 0, x_weights, y_weights);
+    int i;
+    for(i=0;i < prob[set].l;i++)
+    {
+	//printf("..%d..(%d)\n", i, prob[set].x[0]->index);
+	double res = compute_wxi(set, i, x_weights, y_weights); //dot_w(w,prob[set].x[i]);
+	if( res < min )
+	{
+	    min = res;
+	}
+    //printf(" res = %f \n", res);
+    }
+    //printf(" min = %f \n", min);
+    return min;
+}
+
 int main (int argc, char ** argv)
 {
 
@@ -233,6 +336,31 @@ int main (int argc, char ** argv)
     }
 
     svm_save_model(model_filename, &model);
+
+    param.C = 1000000000000000.0; //TODO
+
+    double* w = compute_w( max_index, x_weights, y_weights );
+    double b = ( findmin(0,w, x_weights, y_weights) + findmax(1,w, x_weights, y_weights) ) / 2.0;
+
+    printf("b = %f \n", b);
+
+
+    int correct0 = 0;
+    for(i=0;i<prob[0].l;i++)
+    {
+	double ret = compute_wxi(0,i, x_weights, y_weights) - b;//dot_w(w, prob[0].x[i]) - b;
+	//printf(" i = %d  result = %f  \n", i, ret);
+	if( ret > 0 ) correct0++;
+    }
+
+    int correct1 = 0;
+    for(i=0;i<prob[1].l;i++)
+    {
+	double ret = compute_wxi(1,i, x_weights, y_weights) - b; //dot_w(w, prob[1].x[i]) - b;
+	//printf(" i = %d  result = %f  \n", i, ret);
+	if( ret < 0 ) correct1++;
+    }
+    printf(" %d von %d , %d von %d \n", correct0, prob[0].l, correct1, prob[1].l);
 
 //    rho = 1.0;
 /*

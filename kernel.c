@@ -26,6 +26,7 @@ double dot(const struct svm_node *px, const struct svm_node *py)
 				++px;
 		}
 	}
+    //printf("  dot = %f \n", sum);
 	return sum;
 }
 
